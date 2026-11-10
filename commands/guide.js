@@ -14,6 +14,7 @@ const GUIDE_QUICK =
     `.autoreply group off|mention|all\n` +
     `.autoreply cooldown 10\n` +
     `.autoreply meta on|off\n` +
+    `.autoreply buttons on|off\n` +
     `.autoreply voice on|off\n` +
     `.autoreply react on|off\n\n` +
     `*Status posting*\n` +
@@ -27,6 +28,7 @@ const GUIDE_QUICK =
     `.schedule list\n\n` +
     `*Utilities*\n` +
     `.ping • .voice <text> • .unfurl <url>\n` +
+    `.products / .shop • .website / .links\n` +
     `.linkpreview on|off • .react 👍 • .poll\n\n` +
     `*Moderation*\n` +
     `.ban • .kick • .promote • .demote • .mute\n` +
@@ -50,6 +52,7 @@ const GUIDE_FULL = [
     `.autoreply meta on|off — Meta-AI style\n` +
     `.autoreply stream|suggest|sources on|off\n` +
     `.autoreply copybox off|code|all\n` +
+    `.autoreply buttons on|off — Website/Menu/Products buttons\n` +
     `.autoreply code on|off\n` +
     `.autoreply engine auto|chatgpt|bjgpt|offline\n` +
     `.autoreply voice on|off — speak first sentence\n` +

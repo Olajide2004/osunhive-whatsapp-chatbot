@@ -820,6 +820,17 @@ async function autoreplyCommand(sock, chatId, message) {
                     });
                     return;
                 }
+            } else if (action === 'buttons' || action === 'button') {
+                const mode = (args[1] || 'toggle').toLowerCase();
+                if (mode === 'toggle') config.buttons = config.buttons === false;
+                else if (['on', 'enable', 'yes'].includes(mode)) config.buttons = true;
+                else if (['off', 'disable', 'no'].includes(mode)) config.buttons = false;
+                else {
+                    await sock.sendMessage(chatId, {
+                        text: '❌ Invalid option.\nUse: `.autoreply buttons on|off`'
+                    });
+                    return;
+                }
             } else if (['stream', 'suggest', 'sources'].includes(action)) {
                 const flag = { stream: 'metaStream', suggest: 'metaSuggest', sources: 'metaSources' }[action];
                 const mode = (args[1] || 'toggle').toLowerCase();
@@ -843,6 +854,7 @@ async function autoreplyCommand(sock, chatId, message) {
                         '• `.autoreply copybox off|code|all`\n' +
                         '• `.autoreply meta on|off`\n' +
                         '• `.autoreply stream|suggest|sources on|off`\n' +
+                        '• `.autoreply buttons on|off`\n' +
                         '• `.autoreply voice on|off`\n' +
                         '• `.autoreply react on|off`'
                 });
@@ -872,6 +884,7 @@ async function autoreplyCommand(sock, chatId, message) {
                 `👥 Groups: ${groupIcon} ${groupReply} • cooldown ${Math.round((config.groupCooldownMs || 0) / 1000)}s\n` +
                 `🖥️ Code highlight: ${config.codeHighlight === false ? 'OFF' : 'ON'}\n` +
                 `🗂️ Copy box: ${config.copyBox || 'code'}\n` +
+                `🔗 Action buttons: ${config.buttons === false ? 'OFF' : 'ON'}\n` +
                 `🤖 Persona: ${config.replyStyle === 'classic' ? 'Classic' : 'Meta AI'} ` +
                 `(stream ${config.metaStream !== false ? 'on' : 'off'}, ` +
                 `suggest ${config.metaSuggest !== false ? 'on' : 'off'}, ` +
@@ -1088,25 +1101,10 @@ async function handleAutoReply(sock, chatId, userMessage, message = null) {
             }
         };
 
-        // Meta AI style: stream the answer with progressive edits
-        if (
-            config.replyStyle === 'meta' &&
-            config.metaStream !== false &&
-            typeof replyText === 'string' &&
-            replyText.trim().length > 0
-        ) {
-            await streamReply(sock, chatId, replyText, {
-                quoted: message,
-                contextInfo: replyContext
-            });
-            markReplySent(senderJid);
-            await finishReply();
-            return true;
-        }
-
         markReplySent(senderJid);
 
-        // Dispatch final payload with buttons when it fits WhatsApp's limits
+        // Dispatch the final payload. Interactive buttons give the user a
+        // one-tap "Website" link plus "Menu" / "Products" shortcuts.
         const canUseButtons =
             buttonsEnabled &&
             typeof replyText === 'string' &&
@@ -1118,7 +1116,7 @@ async function handleAutoReply(sock, chatId, userMessage, message = null) {
                 text: replyText,
                 footer: `© ${settings.botName || 'Osunhive Chatbot'}`,
                 ctaUrl: 'https://www.osunhive.name.ng',
-                ctaUrlText: '🌐 Visit Osunhive',
+                ctaUrlText: '🌐 Osunhive',
                 quickReplies: [
                     { id: 'ar_menu', text: '📋 Menu' },
                     { id: 'ar_product', text: '📦 Products' }
@@ -1126,12 +1124,31 @@ async function handleAutoReply(sock, chatId, userMessage, message = null) {
                 quoted: message,
                 contextInfo: replyContext
             });
-        } else {
-            await sock.sendMessage(chatId, {
-                text: replyText,
+            await finishReply();
+            return true;
+        }
+
+        // Meta AI style: stream the answer with progressive edits.
+        // Streaming cannot carry buttons, so it is only used when the reply is
+        // too long for an interactive message or buttons are disabled.
+        if (
+            config.replyStyle === 'meta' &&
+            config.metaStream !== false &&
+            typeof replyText === 'string' &&
+            replyText.trim().length > 0
+        ) {
+            await streamReply(sock, chatId, replyText, {
+                quoted: message,
                 contextInfo: replyContext
             });
+            await finishReply();
+            return true;
         }
+
+        await sock.sendMessage(chatId, {
+            text: replyText,
+            contextInfo: replyContext
+        });
 
         await finishReply();
         return true;

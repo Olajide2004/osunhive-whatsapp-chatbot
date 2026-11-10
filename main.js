@@ -169,6 +169,8 @@ const { pmblockerCommand, readState: readPmBlockerState } = require('./commands/
 const settingsCommand = require('./commands/settings');
 const soraCommand = require('./commands/sora');
 const buttonCommand = require('./commands/button');
+const productsCommand = require('./commands/products');
+const websiteCommand = require('./commands/website');
 
 // Global settings
 
@@ -224,10 +226,11 @@ const BUTTON_COMMANDS = {
     autoreply_code_off: '.autoreply code off',
 
     // Auto-reply answer buttons
-    ar_menu: 'menu',
-    ar_product: 'product',
-    ar_website: 'website',
-    ar_offline: 'offline',
+    ar_menu: '.menu',
+    ar_product: '.products',
+    ar_website: '.website',
+    ar_offline: '.guide',
+    ar_guide: '.guide',
 
     // Misc
     ping: '.ping',
@@ -659,6 +662,16 @@ if (!userMessage.startsWith('.')) {
                     userMessage.slice(6).trim().split(' ').filter(Boolean),
                     message
                 );
+                commandExecuted = true;
+                break;
+            case userMessage === '.products' || userMessage === '.product' ||
+                 userMessage === '.shop' || userMessage === '.store':
+                await productsCommand(sock, chatId, message);
+                commandExecuted = true;
+                break;
+            case userMessage === '.website' || userMessage === '.links' ||
+                 userMessage === '.link' || userMessage === '.socials':
+                await websiteCommand(sock, chatId, message);
                 commandExecuted = true;
                 break;
             case userMessage === '.sticker' || userMessage === '.s':

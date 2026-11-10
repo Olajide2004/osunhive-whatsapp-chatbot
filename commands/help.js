@@ -24,6 +24,7 @@ const SECTIONS = {
         title: 'General Commands',
         body: [
             '.help / .menu', '.ping', '.alive', '.button / .btn', '.tts <text>', '.guide [full]',
+            '.products / .shop', '.website / .links',
             '.owner', '.joke', '.quote', '.fact', '.weather <city>', '.news',
             '.attp <text>', '.lyrics <song_title>', '.8ball <question>',
             '.groupinfo', '.staff / .admins', '.vv', '.vv2',
@@ -55,7 +56,7 @@ const SECTIONS = {
             '.update', '.settings', '.setpp <reply to image>',
             '.autoreact <on/off>', '.autostatus <on/off>',
             '.autostatus react <on/off>', '.savestatus [on/off]',
-            '.autotyping <on/off>', '.autoreply <on/off/meta/copybox/group/cooldown/engine/code>', '.autoread <on/off>',
+            '.autotyping <on/off>', '.autoreply <on/off/meta/copybox/group/cooldown/engine/code/buttons>', '.autoread <on/off>',
             '.autopoststatus [on/off/now/text/add/list/remove/clear/bg/font/interval/delete]',
             '.anticall <on/off>', '.pmblocker <on/off/status>',
             '.pmblocker setmsg <text>', '.setmention <reply to msg>',
@@ -203,6 +204,14 @@ async function sendMainMenu(sock, chatId, message) {
                     { title: 'AI', description: 'AI chat & image generation', id: 'menu_ai' },
                     { title: 'Downloader', description: 'YouTube, TikTok, Instagram', id: 'menu_downloader' },
                     { title: 'GitHub', description: 'Repository links', id: 'menu_github' }
+                ]
+            },
+            {
+                title: '🛍️ Osunhive',
+                rows: [
+                    { title: '📦 Products & Services', description: 'Templates, bots, tools', id: 'ar_product' },
+                    { title: '🌐 Website & Links', description: 'All official channels', id: 'ar_website' },
+                    { title: '📘 Guide', description: 'How to use the bot', id: 'ar_guide' }
                 ]
             }
         ],

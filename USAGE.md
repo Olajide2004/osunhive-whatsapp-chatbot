@@ -87,7 +87,15 @@ subject to the per-sender rate limit (see §4).
 .autoreply stream on       # answer appears progressively (typing/editing effect)
 .autoreply suggest on      # append 3 suggested follow-up questions
 .autoreply sources on      # append "— 🔷 Osunhive AI" + website link
+.autoreply buttons on      # add 🌐 Website + 📋 Menu + 📦 Products action buttons (default on)
+.autoreply buttons off     # plain text replies (no buttons)
 ```
+
+> **Action buttons:** when enabled, each reply carries a **🌐 Osunhive** website
+> link button plus **📋 Menu** and **📦 Products** quick replies. Buttons are sent
+> only for replies under 900 characters; longer answers are streamed as text.
+> Tapping **📋 Menu** opens the command menu, **📦 Products** shows the Osunhive
+> catalogue, and the website button opens `osunhive.name.ng`.
 
 A Meta-style reply looks like:
 
@@ -224,6 +232,7 @@ Recurring messages to a chat or to Status.
 ```
 .help / .menu          .ping          .alive         .button / .btn
 .tts <text>            .voice <text>  .owner         .guide [full]
+.products / .shop      .website / .links             .menu all
 .joke                  .quote         .fact          .weather <city>
 .news                  .attp <text>   .lyrics <song>  .8ball <q>
 .groupinfo             .staff / .admins             .trt <text> <lang>
