@@ -1,0 +1,5 @@
+allowBuilds:
+  '@whiskeysockets/baileys': true
+  es5-ext: true
+  protobufjs: true
+  sharp: true

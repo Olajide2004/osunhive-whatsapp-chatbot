@@ -1,0 +1,30 @@
+{
+  "fallback_template": "👋 Greetings from Osunhive Support!\n\nWe received your query: \"{{query}}\". Our online AI services are temporarily resting, but please visit our portal for quick answers or standard menus:\n🌐 https://www.osunhive.name.ng",
+  "rules": [
+    {
+      "keywords": [
+        "hello",
+        "hi",
+        "hey",
+        "greetings"
+      ],
+      "response": "👋 Hello! Welcome to Osunhive, Nigeria's premier digital tech hub. How can I assist you today?"
+    },
+    {
+      "keywords": [
+        "help",
+        "menu"
+      ],
+      "response": "📌 *Osunhive Help Menu*\n\nYou can interact with me offline using these keywords:\n• *product* - View our templates & tools\n• *website* - Official URL\n• *application* - Learn about our mobile apps\n• *offline* - View quick FAQs"
+    },
+    {
+      "keywords": [
+        "price",
+        "buy",
+        "cost",
+        "template"
+      ],
+      "response": "Osunhive UI is our premium modern responsive Blogger template. Visit our portal for details: https://www.osunhive.name.ng"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "enabled": false,
+  "autoreply": true,
+  "presence": true,
+  "buttons": true,
+  "groupReply": "off",
+  "groupCooldownMs": 12000,
+  "codeHighlight": true,
+  "copyBox": "code",
+  "replyStyle": "meta",
+  "metaStream": true,
+  "metaSuggest": true,
+  "metaSources": true,
+  "aiEngine": "auto",
+  "voiceReplies": true,
+  "autoReactHeart": false
+}

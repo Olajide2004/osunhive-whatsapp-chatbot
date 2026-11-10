@@ -1,0 +1,13 @@
+{
+  "enabled": false,
+  "intervalMinutes": 60,
+  "text": "🤖 *Osunhive Chatbot* is online!\n\nType *.menu* to explore commands.\n🌐 https://www.osunhive.name.ng",
+  "texts": [],
+  "textIndex": 0,
+  "backgroundColor": "#1F2C34",
+  "font": 1,
+  "recipients": [],
+  "maxRecipients": 300,
+  "lastPostedAt": 0,
+  "lastStatus": null
+}

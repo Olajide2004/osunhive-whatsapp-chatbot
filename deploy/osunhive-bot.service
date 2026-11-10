@@ -1,0 +1,25 @@
+[Unit]
+Description=Osunhive WhatsApp Chatbot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Change this to the user that owns /opt/osunhive-v2
+User=osunhive
+WorkingDirectory=/opt/osunhive-v2
+Environment=NODE_ENV=production
+# Change to the WhatsApp number the bot should run on
+Environment=BOT_PHONE_NUMBER=<PHONE_NUMBER>
+ExecStart=/usr/bin/node index.js --pairing-code
+Restart=always
+RestartSec=5
+# Always stop with SIGTERM so session writes flush (SIGKILL causes "Bad MAC")
+KillSignal=SIGTERM
+KillMode=mixed
+TimeoutStopSec=20
+# Prevent runaway memory
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target
