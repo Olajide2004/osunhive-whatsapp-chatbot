@@ -20,8 +20,8 @@
   "keywords": [
     "whatsapp-bot"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Osunhive",
+  "license": "MIT",
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@ffmpeg/ffmpeg": "^0.12.15",
