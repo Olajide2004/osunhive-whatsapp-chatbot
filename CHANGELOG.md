@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Direct-link status posting** — `.autostatuspost <direct-link.mp4>` (or
+  `.autopoststatus <url>`, `.autopoststatus now <url>`, with an optional
+  `| caption`). Type is taken from the file extension, then the server's
+  `Content-Type`; files over 80 MB are rejected. (`commands/autopoststatus.js`)
+- **Action buttons on auto-replies** — every AI answer under 900 characters now
+  ships a 🌐 website link button plus 📋 Menu and 📦 Products quick replies
+  (`.autoreply buttons on|off`). Streaming is skipped for short replies so the
+  buttons are always delivered.
+- **New commands** — `.products` / `.shop` / `.store` (Osunhive catalogue) and
+  `.website` / `.links` / `.socials` (all official channels), with a
+  🛍️ Osunhive section in the interactive menu.
+
+### Fixed
+- Button-id routing: `ar_menu`, `ar_product`, `ar_website`, `ar_offline` now
+  resolve to real commands (previously dead two-step mappings).
+
 ## v2.0.0 — Final cloud release (2026-11-10)
 
 Osunhive Chatbot v2.0.0 — Baileys 7-rc based WhatsApp automation bot.

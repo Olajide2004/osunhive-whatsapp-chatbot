@@ -176,6 +176,7 @@ Post text or media to WhatsApp Status on a schedule.
 .autopoststatus on                     # start the scheduler
 .autopoststatus off                    # stop it
 .autopoststatus now [caption]          # post immediately
+.autostatuspost <direct-link.mp4>      # post media straight from a URL (image or video)
 .autopoststatus interval 60            # minutes between posts (5–1440)
 .autopoststatus text <message>         # set the single status text
 .autopoststatus add <message>          # add to the rotating pool
@@ -196,8 +197,19 @@ Post text or media to WhatsApp Status on a schedule.
 
 Aliases: `.autostatuspost`, `.statuspost`, `.autopost`.
 
-To post a **media** status, caption a photo/video with
-`.autopoststatus now`.
+To post a **media** status, either caption a photo/video with
+`.autopoststatus now`, or paste a **direct link**:
+
+```
+.autostatuspost https://example.com/clip.mp4            # video (mp4, mov, webm…)
+.autostatuspost https://example.com/photo.jpg           # image (jpg, png, webp…)
+.autostatuspost https://example.com/clip.mp4 | My caption
+.autopoststatus now https://example.com/clip.mp4        # same, via .autopoststatus
+```
+
+The type is taken from the file extension and, if that is unclear, from the
+server's `Content-Type`. Files over **80 MB** are rejected (WhatsApp's status
+limit). Direct links must be publicly reachable.
 
 Manual one-off status (no scheduler): `.autostatus` / `.savestatus`.
 

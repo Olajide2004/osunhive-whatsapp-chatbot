@@ -6,7 +6,8 @@
  * Owner commands:
  *   .autopoststatus                      show settings
  *   .autopoststatus on | off             enable / disable scheduler
- *   .autopoststatus now [text]           post now (text, or media you replied to)
+ *   .autopoststatus now [text]           post now (text, media you replied to, or a direct link)
+ *   .autopoststatus <direct-link.mp4>    post media straight from a URL (alias: .autostatuspost)
  *   .autopoststatus preview              preview the next status in this chat
  *   .autopoststatus text <message>       set the main text
  *   .autopoststatus add <message>        add a text to the rotation
@@ -156,6 +157,64 @@ async function downloadMedia(media, kind) {
     const chunks = [];
     for await (const chunk of stream) chunks.push(chunk);
     return Buffer.concat(chunks);
+}
+
+/* ------------------------------------------------------------------ */
+/* Direct media links                                                  */
+/* ------------------------------------------------------------------ */
+
+const URL_RE = /https?:\/\/[^\s|]+/i;
+const VIDEO_EXT_RE = /\.(mp4|mov|webm|m4v|mkv|3gp)(?:\?|#|$)/i;
+const IMAGE_EXT_RE = /\.(jpe?g|png|webp|gif)(?:\?|#|$)/i;
+const MAX_URL_MEDIA_BYTES = 80 * 1024 * 1024; // WhatsApp status media ceiling
+
+/** First http(s) URL inside a string. */
+function extractUrl(text) {
+    const match = URL_RE.exec(String(text || ''));
+    return match ? match[0] : null;
+}
+
+/** Guess the media kind from the URL extension (may be null). */
+function guessMediaKind(url) {
+    if (VIDEO_EXT_RE.test(url)) return 'video';
+    if (IMAGE_EXT_RE.test(url)) return 'image';
+    return null;
+}
+
+/**
+ * Download an image/video from a direct link.
+ * Kind comes from the extension, then the Content-Type header as a fallback.
+ * @returns {Promise<{kind: string, buffer: Buffer}>}
+ */
+async function downloadUrlMedia(url) {
+    if (typeof fetch !== 'function') {
+        throw new Error('fetch() is unavailable — Node 18+ is required.');
+    }
+
+    let kind = guessMediaKind(url);
+
+    const res = await withTimeout(fetch(url, { redirect: 'follow' }), 60000, 'media download');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+    const length = Number(res.headers.get('content-length') || 0);
+    if (length && length > MAX_URL_MEDIA_BYTES) {
+        throw new Error(`File too large (${(length / 1048576).toFixed(1)} MB > 80 MB).`);
+    }
+
+    if (!kind) {
+        if (contentType.startsWith('video/')) kind = 'video';
+        else if (contentType.startsWith('image/')) kind = 'image';
+        else throw new Error(`Unsupported content-type: ${contentType || 'unknown'}`);
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (!buffer.length) throw new Error('Downloaded file was empty.');
+    if (buffer.length > MAX_URL_MEDIA_BYTES) {
+        throw new Error(`File too large (${(buffer.length / 1048576).toFixed(1)} MB > 80 MB).`);
+    }
+
+    return { kind, buffer };
 }
 
 /* ------------------------------------------------------------------ */
@@ -398,6 +457,13 @@ async function postMediaStatus(sock, mediaKind, buffer, caption, storeRef) {
     return sendStatus(sock, content, storeRef, 60000);
 }
 
+/** Download a direct media link and post it as a status. */
+async function postUrlStatus(sock, url, caption, storeRef) {
+    const { kind, buffer } = await downloadUrlMedia(url);
+    const result = await postMediaStatus(sock, kind, buffer, caption, storeRef);
+    return { ...result, kind, bytes: buffer.length };
+}
+
 async function deleteLastStatus(sock, lastStatus, storeRef) {
     if (!lastStatus?.id) throw new Error('No stored status to delete');
     const jidList = await buildStatusJidList(sock, storeRef);
@@ -528,7 +594,8 @@ function settingsText(config) {
         `*Rotation:*\n${pool}\n\n` +
         `*Commands:*\n` +
         `• \`.autopoststatus on|off\`\n` +
-        `• \`.autopoststatus now [text]\` (reply to an image/video to post media)\n` +
+        `• \`.autopoststatus now [text]\` (reply to an image/video, or paste a direct link)\n` +
+        `• \`.autostatuspost <direct-link.mp4>\` post media from a link (image or video)\n` +
         `• \`.autopoststatus preview\`\n` +
         `• \`.autopoststatus text <message>\`\n` +
         `• \`.autopoststatus add <message>\`\n` +
@@ -582,10 +649,52 @@ async function autopostStatusCommand(sock, chatId, message, storeRef = store) {
             return reply('🚫 Auto status posting *disabled*.');
         }
 
-        /* --- post now (text or replied media) --- */
+        /* --- direct media link: .autopoststatus <url.mp4> [| caption] --- */
+        if (/^https?:\/\//i.test(action)) {
+            const url = extractUrl(body);
+            const caption = body.replace(url, '').replace(/^\s*\|?\s*/, '').trim();
+
+            await reply(`⏳ Downloading from link...`);
+            try {
+                const result = await postUrlStatus(sock, url, caption, storeRef);
+                config.lastPostedAt = Date.now();
+                config.lastStatus = { id: result.msg?.key?.id || null, at: Date.now() };
+                writeConfig(config);
+                return reply(
+                    `✅ ${result.kind} status posted from link to *${result.recipients}* recipient(s).` +
+                    `\n_${(result.bytes / 1048576).toFixed(2)} MB downloaded._` +
+                    (result.capped ? `\n_Cap ${result.recipients} of ${result.knownCount} known._` : '')
+                );
+            } catch (error) {
+                console.error('[autopoststatus] URL status failed:', error.message);
+                return reply('❌ Failed to post status from link: ' + error.message);
+            }
+        }
+
+        /* --- post now (text, replied media, or a direct link) --- */
         if (action === 'now' || action === 'post') {
             const oneOff = body.slice(action.length).trim();
             const media = resolveMedia(message);
+            const oneOffUrl = extractUrl(oneOff);
+
+            if (!media && oneOffUrl) {
+                const caption = oneOff.replace(oneOffUrl, '').replace(/^\s*\|?\s*/, '').trim();
+                await reply('⏳ Downloading from link...');
+                try {
+                    const result = await postUrlStatus(sock, oneOffUrl, caption, storeRef);
+                    config.lastPostedAt = Date.now();
+                    config.lastStatus = { id: result.msg?.key?.id || null, at: Date.now() };
+                    writeConfig(config);
+                    return reply(
+                        `✅ ${result.kind} status posted from link to *${result.recipients}* recipient(s).` +
+                        `\n_${(result.bytes / 1048576).toFixed(2)} MB downloaded._` +
+                        (result.capped ? `\n_Cap ${result.recipients} of ${result.knownCount} known._` : '')
+                    );
+                } catch (error) {
+                    console.error('[autopoststatus] URL status failed:', error.message);
+                    return reply('❌ Failed to post status from link: ' + error.message);
+                }
+            }
 
             if (media) {
                 await reply(`⏳ Downloading ${media.kind}...`);
