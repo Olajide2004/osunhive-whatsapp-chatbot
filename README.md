@@ -1,13 +1,19 @@
-# Osunhive WhatsApp Chatbot
+<div align="center">
 
-**Osunhive Technology: Learn, Grow, Innovate, Earn.**
+![Osunhive WhatsApp Chatbot](assets/banner.svg)
+
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&pause=1000&color=25D366&center=true&vCenter=true&width=820&lines=Osunhive+WhatsApp+Chatbot;Learn+%E2%80%A2+Grow+%E2%80%A2+Innovate+%E2%80%A2+Earn;Interactive+menus+%7C+Meta-AI+replies+%7C+Status+poster;Free+coding+at+www.osunhive.name.ng)](https://www.osunhive.name.ng)
+
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=for-the-badge&logo=node.js)](https://nodejs.org)
+[![Baileys](https://img.shields.io/badge/Baileys-7.0.0--rc.9-25D366?style=for-the-badge)](https://github.com/WhiskeySockets/Baileys)
+[![Release](https://img.shields.io/github/v/release/Olajide2004/osunhive-whatsapp-chatbot?style=for-the-badge&color=25D366)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/Olajide2004/osunhive-whatsapp-chatbot?style=for-the-badge&color=25D366)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/stargazers)
+[![Visitors](https://komarev.com/ghpvc/?username=Olajide2004&label=Visitors&color=25D366&style=for-the-badge)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot)
 
 An intelligent WhatsApp automation bot built on [Baileys](https://github.com/WhiskeySockets/Baileys) — interactive list menus, Meta-AI style auto-replies, automatic status posting, scheduling, voice notes, media tools and a full moderation suite.
 
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
-[![Baileys](https://img.shields.io/badge/Baileys-7.0.0--rc.9-25D366)](https://github.com/WhiskeySockets/Baileys)
-[![Release](https://img.shields.io/github/v/release/Olajide2004/osunhive-whatsapp-chatbot)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/releases)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+</div>
 
 ---
 
@@ -175,6 +181,35 @@ node test-polls.js
 
 ---
 
+## 📊 Statistics
+
+<div align="center">
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Olajide2004&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&title_color=25D366&icon_color=25D366&bg_color=0d1117&text_color=c9d1d9)
+
+![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=Olajide2004&hide_border=true&background=0d1117&ring=25D366&fire=25D366&currStreakLabel=25D366&sideLabels=c9d1d9&dates=8b949e)
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=Olajide2004&layout=compact&hide_border=true&bg_color=0d1117&title_color=25D366&text_color=c9d1d9)
+
+![Activity Graph](https://github-readme-activity-graph.vercel.app/graph?username=Olajide2004&hide_border=true&bg_color=0d1117&color=25D366&line=25D366&point=ffffff&area=true)
+
+</div>
+
+### Project facts
+
+| Metric | Value |
+| --- | --- |
+| Version | `2.0.0` |
+| Engine | Baileys `7.0.0-rc.9` (Node ≥ 18) |
+| Command modules | `116` |
+| Library modules | `36` |
+| Menu sections | `12` |
+| Source lines | `~22,800` |
+| Test suites | `6` offline suites |
+| Release archive | ~1.7 MB (source only) |
+
+---
+
 ## Connect with Osunhive
 
 - 🌐 Website — [osunhive.name.ng](https://www.osunhive.name.ng)
@@ -190,8 +225,17 @@ node test-polls.js
 
 ## Credits
 
+- 💚 Built and maintained by **Osunhive Technology** — business GitHub: [**@osunhive**](https://github.com/osunhive)
+- 🎓 **Free coding at [www.osunhive.name.ng](https://www.osunhive.name.ng)**
+- 🔗 All links: [yo.fan/osunhivetech](https://yo.fan/osunhivetech)
 - [Baileys](https://github.com/WhiskeySockets/Baileys) — WhatsApp Web API
 - Original bot scaffold and community libraries
+
+<div align="center">
+
+**[⬆ back to top](#osunhive-whatsapp-chatbot)** · Made with 💚 by [Osunhive](https://www.osunhive.name.ng)
+
+</div>
 
 ## License
 
