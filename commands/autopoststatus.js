@@ -8,6 +8,7 @@
  *   .autopoststatus on | off             enable / disable scheduler
  *   .autopoststatus now [text]           post now (text, media you replied to, or a direct link)
  *   .autopoststatus <direct-link.mp4>    post media straight from a URL (alias: .autostatuspost)
+ *   .autostatuspost cdn:<fileId>         post a file from the Osunhive CDN
  *   .autopoststatus preview              preview the next status in this chat
  *   .autopoststatus text <message>       set the main text
  *   .autopoststatus add <message>        add a text to the rotation
@@ -168,10 +169,72 @@ const VIDEO_EXT_RE = /\.(mp4|mov|webm|m4v|mkv|3gp)(?:\?|#|$)/i;
 const IMAGE_EXT_RE = /\.(jpe?g|png|webp|gif)(?:\?|#|$)/i;
 const MAX_URL_MEDIA_BYTES = 80 * 1024 * 1024; // WhatsApp status media ceiling
 
+const CDN_HOST = 'cdn.osunhive.name.ng';
+const CDN_BASE = `https://${CDN_HOST}`;
+
 /** First http(s) URL inside a string. */
 function extractUrl(text) {
     const match = URL_RE.exec(String(text || ''));
     return match ? match[0] : null;
+}
+
+/**
+ * Turn an Osunhive CDN reference into a direct download URL.
+ *   https://cdn.osunhive.name.ng/<fileId>      → .../download/<fileId>
+ *   cdn:<fileId>                               → .../download/<fileId>
+ * Any other URL is returned unchanged.
+ */
+function normalizeMediaUrl(url) {
+    const raw = String(url || '').trim();
+
+    const shorthand = /^cdn:\s*([A-Za-z0-9_-]{10,})$/i.exec(raw);
+    if (shorthand) return `${CDN_BASE}/download/${shorthand[1]}`;
+
+    try {
+        const parsed = new URL(raw);
+        if (parsed.hostname === CDN_HOST && !/^\/download\//i.test(parsed.pathname)) {
+            const id = parsed.pathname.replace(/^\/+/, '');
+            if (id) return `${CDN_BASE}/download/${id}`;
+        }
+    } catch { /* not a URL — leave as-is */ }
+
+    return raw;
+}
+
+/** Resolve a direct link from free text (URL or cdn:<id>). */
+function resolveLink(text) {
+    const url = extractUrl(text);
+    if (url) return normalizeMediaUrl(url);
+
+    const shorthand = /(?:^|\s)cdn:\s*([A-Za-z0-9_-]{10,})/i.exec(String(text || ''));
+    if (shorthand) return `${CDN_BASE}/download/${shorthand[1]}`;
+
+    return null;
+}
+
+/**
+ * True when a link clearly points at an image/video: a media file extension,
+ * or an Osunhive CDN download link (which serves whatever the file is).
+ */
+function looksLikeMediaLink(url) {
+    if (!url) return false;
+    return guessMediaKind(url) !== null || url.startsWith(`${CDN_BASE}/download/`);
+}
+
+// Command words that must not be mistaken for a media link.
+const KNOWN_ACTIONS = new Set([
+    'on', 'off', 'enable', 'disable', 'enable', 'now', 'post', 'preview',
+    'text', 'add', 'list', 'remove', 'clear', 'bg', 'font', 'interval',
+    'delete', 'recipients', 'limit', 'react', 'help'
+]);
+
+/** Caption = the text left after removing the link. */
+function captionFromBody(body) {
+    let text = String(body || '');
+    const url = extractUrl(text);
+    if (url) text = text.replace(url, '');
+    else text = text.replace(/cdn:\s*[A-Za-z0-9_-]{10,}/i, '');
+    return text.replace(/^\s*\|?\s*/, '').trim();
 }
 
 /** Guess the media kind from the URL extension (may be null). */
@@ -596,6 +659,7 @@ function settingsText(config) {
         `• \`.autopoststatus on|off\`\n` +
         `• \`.autopoststatus now [text]\` (reply to an image/video, or paste a direct link)\n` +
         `• \`.autostatuspost <direct-link.mp4>\` post media from a link (image or video)\n` +
+        `• \`.autostatuspost cdn:<fileId>\` post a file from the Osunhive CDN\n` +
         `• \`.autopoststatus preview\`\n` +
         `• \`.autopoststatus text <message>\`\n` +
         `• \`.autopoststatus add <message>\`\n` +
@@ -650,13 +714,13 @@ async function autopostStatusCommand(sock, chatId, message, storeRef = store) {
         }
 
         /* --- direct media link: .autopoststatus <url.mp4> [| caption] --- */
-        if (/^https?:\/\//i.test(action)) {
-            const url = extractUrl(body);
-            const caption = body.replace(url, '').replace(/^\s*\|?\s*/, '').trim();
+        const directLink = resolveLink(body);
+        if (directLink && looksLikeMediaLink(directLink) && !KNOWN_ACTIONS.has(action)) {
+            const caption = captionFromBody(body);
 
             await reply(`⏳ Downloading from link...`);
             try {
-                const result = await postUrlStatus(sock, url, caption, storeRef);
+                const result = await postUrlStatus(sock, directLink, caption, storeRef);
                 config.lastPostedAt = Date.now();
                 config.lastStatus = { id: result.msg?.key?.id || null, at: Date.now() };
                 writeConfig(config);
@@ -675,13 +739,14 @@ async function autopostStatusCommand(sock, chatId, message, storeRef = store) {
         if (action === 'now' || action === 'post') {
             const oneOff = body.slice(action.length).trim();
             const media = resolveMedia(message);
-            const oneOffUrl = extractUrl(oneOff);
+            const oneOffLink = resolveLink(oneOff);
+            const oneOffIsMedia = oneOffLink && looksLikeMediaLink(oneOffLink);
 
-            if (!media && oneOffUrl) {
-                const caption = oneOff.replace(oneOffUrl, '').replace(/^\s*\|?\s*/, '').trim();
+            if (!media && oneOffIsMedia) {
+                const caption = captionFromBody(oneOff);
                 await reply('⏳ Downloading from link...');
                 try {
-                    const result = await postUrlStatus(sock, oneOffUrl, caption, storeRef);
+                    const result = await postUrlStatus(sock, oneOffLink, caption, storeRef);
                     config.lastPostedAt = Date.now();
                     config.lastStatus = { id: result.msg?.key?.id || null, at: Date.now() };
                     writeConfig(config);
@@ -961,5 +1026,12 @@ module.exports = {
     normalizePhone,
     statusTimeout,
     nextStatusText,
-    readConfig
+    readConfig,
+    // Direct-link / CDN helpers (exported for tests)
+    extractUrl,
+    normalizeMediaUrl,
+    resolveLink,
+    looksLikeMediaLink,
+    guessMediaKind,
+    captionFromBody
 };

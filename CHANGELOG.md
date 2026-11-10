@@ -7,6 +7,9 @@
   `.autopoststatus <url>`, `.autopoststatus now <url>`, with an optional
   `| caption`). Type is taken from the file extension, then the server's
   `Content-Type`; files over 80 MB are rejected. (`commands/autopoststatus.js`)
+- **Osunhive CDN links** — `cdn:<fileId>` shorthand and
+  `https://cdn.osunhive.name.ng/<fileId>` are auto-resolved to the
+  `/download/<fileId>` endpoint; type comes from `Content-Type`.
 - **Action buttons on auto-replies** — every AI answer under 900 characters now
   ships a 🌐 website link button plus 📋 Menu and 📦 Products quick replies
   (`.autoreply buttons on|off`). Streaming is skipped for short replies so the

@@ -222,6 +222,39 @@ async function run() {
     await autopostStatusCommand(sock, '2348099999999@s.whatsapp.net', strangerMsg, storeRef);
     assert.ok(lastText().includes('only available for the owner'), 'non-owner blocked');
 
+    // direct-link / CDN helpers
+    const {
+        extractUrl, normalizeMediaUrl, resolveLink, looksLikeMediaLink,
+        guessMediaKind, captionFromBody
+    } = require('./commands/autopoststatus');
+
+    const ID = '1GwuQmqxrh2cexkO5RwZAItslY7KXdOKZ';
+    const CDN = `https://cdn.osunhive.name.ng/download/${ID}`;
+
+    assert.strictEqual(extractUrl(`see ${CDN} now`), CDN);
+    assert.strictEqual(extractUrl('no link here'), null);
+
+    // every CDN form normalises to /download/<id>
+    assert.strictEqual(normalizeMediaUrl(`https://cdn.osunhive.name.ng/${ID}`), CDN);
+    assert.strictEqual(normalizeMediaUrl(CDN), CDN);
+    assert.strictEqual(normalizeMediaUrl(`cdn:${ID}`), CDN);
+    assert.strictEqual(normalizeMediaUrl('https://example.com/a.mp4'), 'https://example.com/a.mp4');
+
+    assert.strictEqual(resolveLink(`cdn:${ID}`), CDN);
+    assert.strictEqual(resolveLink(`x https://example.com/a.mp4`), 'https://example.com/a.mp4');
+    assert.strictEqual(resolveLink('.autopoststatus list'), null);
+
+    assert.ok(looksLikeMediaLink(CDN));
+    assert.ok(looksLikeMediaLink('https://example.com/a.mp4'));
+    assert.strictEqual(looksLikeMediaLink('https://example.com/page'), false);
+
+    assert.strictEqual(guessMediaKind('https://x/a.MP4'), 'video');
+    assert.strictEqual(guessMediaKind('https://x/a.webp?x=1'), 'image');
+    assert.strictEqual(guessMediaKind(CDN), null);
+
+    assert.strictEqual(captionFromBody(`${CDN} | My caption`), 'My caption');
+    assert.strictEqual(captionFromBody(`cdn:${ID} hello`), 'hello');
+
     console.log('✅ all autopoststatus tests passed');
 }
 

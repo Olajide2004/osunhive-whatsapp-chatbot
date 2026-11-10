@@ -177,6 +177,7 @@ Post text or media to WhatsApp Status on a schedule.
 .autopoststatus off                    # stop it
 .autopoststatus now [caption]          # post immediately
 .autostatuspost <direct-link.mp4>      # post media straight from a URL (image or video)
+.autostatuspost cdn:<fileId>           # post a file from the Osunhive CDN
 .autopoststatus interval 60            # minutes between posts (5–1440)
 .autopoststatus text <message>         # set the single status text
 .autopoststatus add <message>          # add to the rotating pool
@@ -210,6 +211,23 @@ To post a **media** status, either caption a photo/video with
 The type is taken from the file extension and, if that is unclear, from the
 server's `Content-Type`. Files over **80 MB** are rejected (WhatsApp's status
 limit). Direct links must be publicly reachable.
+
+### Osunhive CDN links
+
+`cdn.osunhive.name.ng` lists Google Drive files. Every file has an **id**; the
+direct URL is `https://cdn.osunhive.name.ng/download/<id>`. All of these forms
+work and resolve to the same download:
+
+```
+.autostatuspost cdn:1GwuQmqxrh2cexkO5RwZAItslY7KXdOKZ
+.autostatuspost https://cdn.osunhive.name.ng/1GwuQmqxrh2cexkO5RwZAItslY7KXdOKZ
+.autostatuspost https://cdn.osunhive.name.ng/download/1GwuQmqxrh2cexkO5RwZAItslY7KXdOKZ
+.autostatuspost cdn:1GwuQmqxrh2cexkO5RwZAItslY7KXdOKZ | Library photo
+```
+
+Files on the CDN have no file extension, so the type is decided by the server's
+`Content-Type` (`image/*` → image, `video/*` → video). Audio and any other type
+are rejected with a clear message.
 
 Manual one-off status (no scheduler): `.autostatus` / `.savestatus`.
 
