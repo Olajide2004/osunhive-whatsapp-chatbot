@@ -70,7 +70,9 @@ const GUIDE_FULL = [
     `.autopoststatus remove <n> | clear\n` +
     `.autopoststatus bg #1F2C34 | font 0-5\n` +
     `.autopoststatus recipients add|remove|clear|list\n` +
-    `.autopoststatus limit <n> (0 = everyone)`,
+    `.autopoststatus limit <n> (0 = everyone)\n` +
+    `.autostatuspost <direct-link.mp4 | cdn:<fileId>>\n` +
+    `.cdn [list/page/info/link/send/post] [n]`,
 
     `*Scheduled tasks*\n` +
     `.schedule add here every 30m text Reminder\n` +

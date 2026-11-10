@@ -1033,5 +1033,7 @@ module.exports = {
     resolveLink,
     looksLikeMediaLink,
     guessMediaKind,
-    captionFromBody
+    captionFromBody,
+    downloadUrlMedia,
+    postUrlStatus
 };

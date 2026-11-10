@@ -59,6 +59,7 @@ const SECTIONS = {
             '.autotyping <on/off>', '.autoreply <on/off/meta/copybox/group/cooldown/engine/code/buttons>', '.autoread <on/off>',
             '.autopoststatus [on/off/now/text/add/list/remove/clear/bg/font/interval/delete]',
             '.autostatuspost <direct-link.mp4 | cdn:<fileId>>',
+            '.cdn [list/refresh/page/info/link/send/post] [n]',
             '.anticall <on/off>', '.pmblocker <on/off/status>',
             '.pmblocker setmsg <text>', '.setmention <reply to msg>',
             '.mention <on/off>'

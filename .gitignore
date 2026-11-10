@@ -23,6 +23,7 @@ commit-msg.txt
 # Runtime statistics/state — may contain JIDs, LIDs and phone numbers
 data/messageCount.json
 data/premium.json
+data/cdnCache.json
 
 # OS / editor files
 .idea/

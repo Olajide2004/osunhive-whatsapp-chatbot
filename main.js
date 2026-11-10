@@ -125,6 +125,7 @@ const vv2Command = require('./commands/vv2');
 const clearSessionCommand = require('./commands/clearsession');
 const { autoStatusCommand, handleStatusUpdate } = require('./commands/autostatus');
 const { autopostStatusCommand } = require('./commands/autopoststatus');
+const cdnCommand = require('./commands/cdn');
 const savestatusCommand = require('./commands/savestatus');
 const { autoSave: savestatusAutoSave } = savestatusCommand;
 const groupstatusCommand = require('./commands/groupstatus');
@@ -554,7 +555,7 @@ if (!userMessage.startsWith('.')) {
         const isAdminCommand = adminCommands.some(cmd => userMessage.startsWith(cmd));
 
         // List of owner commands
-        const ownerCommands = ['.mode', '.autostatus', '.autopoststatus', '.autostatuspost', '.statuspost', '.savestatus', '.savesm', '.savest', '.antidelete', '.cleartmp', '.setpp', '.clearsession', '.areact', '.autoreact', '.autotyping', '.autoreply', '.autoread', '.pmblocker', '.schedule', '.linkpreview'];
+        const ownerCommands = ['.mode', '.autostatus', '.autopoststatus', '.autostatuspost', '.statuspost', '.savestatus', '.savesm', '.savest', '.antidelete', '.cleartmp', '.setpp', '.clearsession', '.areact', '.autoreact', '.autotyping', '.autoreply', '.autoread', '.pmblocker', '.schedule', '.linkpreview', '.cdn'];
         const isOwnerCommand = ownerCommands.some(cmd => userMessage.startsWith(cmd));
 
         let isSenderAdmin = false;
@@ -1142,6 +1143,9 @@ if (!userMessage.startsWith('.')) {
                  userMessage.startsWith('.statuspost') ||
                  userMessage.startsWith('.autopost'):
                 await autopostStatusCommand(sock, chatId, message);
+                break;
+            case userMessage.startsWith('.cdn'):
+                await cdnCommand(sock, chatId, message);
                 break;
             case /^\.autostatus(\s|$)/.test(userMessage):
                 const autoStatusArgs = userMessage.split(' ').slice(1);

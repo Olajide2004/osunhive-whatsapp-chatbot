@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **CDN browser** — `.cdn` lists the Osunhive CDN (https://cdn.osunhive.name.ng)
+  in WhatsApp, numbered and cached; `.cdn <n>` posts an image/video entry to
+  Status, `.cdn send <n>` sends it to the chat, `.cdn link <n>` /
+  `.cdn info <n>` / `.cdn page <n>` / `.cdn refresh` for the rest.
+  (`commands/cdn.js`)
 - **Direct-link status posting** — `.autostatuspost <direct-link.mp4>` (or
   `.autopoststatus <url>`, `.autopoststatus now <url>`, with an optional
   `| caption`). Type is taken from the file extension, then the server's

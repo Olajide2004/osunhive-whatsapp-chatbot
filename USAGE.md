@@ -229,6 +229,26 @@ Files on the CDN have no file extension, so the type is decided by the server's
 `Content-Type` (`image/*` → image, `video/*` → video). Audio and any other type
 are rejected with a clear message.
 
+### Browsing the CDN — `.cdn`
+
+You don't need to know a file id. `.cdn` lists the whole CDN in WhatsApp:
+
+```
+.cdn                       # numbered list (folders first, then files)
+.cdn page 2                # next page (20 per page)
+.cdn refresh               # re-fetch the listing
+.cdn info 7                # type, size, id and link for entry #7
+.cdn link 7                # just the direct download link
+.cdn send 7                # send entry #7 into this chat
+.cdn 7                     # post entry #7 to Status (image/video only)
+.cdn 7 | My caption        # …with a caption
+.cdn post 7                # same as `.cdn 7`
+```
+
+Entries marked ✅ are images/videos that WhatsApp Status accepts. Folders and
+Google Docs/Sheets appear in the list but cannot be posted (the CDN only serves
+binary files, so Google-native files can't be downloaded).
+
 Manual one-off status (no scheduler): `.autostatus` / `.savestatus`.
 
 ---
