@@ -74,6 +74,14 @@ const GUIDE_FULL = [
     `.autostatuspost <direct-link.mp4 | cdn:<fileId>>\n` +
     `.cdn [list/page/info/link/send/post] [n]`,
 
+    `*CDN browser*\n` +
+    `.cdn — list the current folder\n` +
+    `.cdn <n> — open a folder / post a media file\n` +
+    `.cdn <folder/path> — open by name\n` +
+    `.cdn .. | back — up one folder\n` +
+    `.cdn / | root — back to the CDN root\n` +
+    `.cdn link|send|info <n> — link, file, details`,
+
     `*Scheduled tasks*\n` +
     `.schedule add here every 30m text Reminder\n` +
     `.schedule add here daily 08:30 voice Standup\n` +

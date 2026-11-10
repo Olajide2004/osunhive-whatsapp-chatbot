@@ -24,6 +24,7 @@ commit-msg.txt
 data/messageCount.json
 data/premium.json
 data/cdnCache.json
+data/cdnState.json
 
 # OS / editor files
 .idea/

@@ -231,19 +231,31 @@ are rejected with a clear message.
 
 ### Browsing the CDN — `.cdn`
 
-You don't need to know a file id. `.cdn` lists the whole CDN in WhatsApp:
+Folders are addressed by their **name path** (`GDrive Upload BOT`, `A/B`) and
+files by id (`/download/<id>`). `.cdn` keeps a current folder per chat, so you
+can walk in and out like a file manager:
 
 ```
-.cdn                       # numbered list (folders first, then files)
+.cdn                       # list the current folder (root by default)
+.cdn 1                     # open folder #1  (or post media #1)
+.cdn GDrive Upload BOT     # open a folder by path
+.cdn open A/B              # same, explicit
+.cdn ..                    # up one folder  (also: .cdn back)
+.cdn /                     # back to the CDN root  (also: .cdn root)
+.cdn path                  # show the current folder
 .cdn page 2                # next page (20 per page)
-.cdn refresh               # re-fetch the listing
-.cdn info 7                # type, size, id and link for entry #7
-.cdn link 7                # just the direct download link
-.cdn send 7                # send entry #7 into this chat
-.cdn 7                     # post entry #7 to Status (image/video only)
-.cdn 7 | My caption        # …with a caption
-.cdn post 7                # same as `.cdn 7`
+.cdn refresh               # re-fetch the current folder
+.cdn info 4                # type, size, id and link
+.cdn link 4                # just the direct download link
+.cdn send 4                # send the file into this chat
+.cdn 4                     # post entry #4 to Status (image/video only)
+.cdn 4 | My caption        # …with a caption
+.cdn post 4                # same as `.cdn 4`
 ```
+
+A folder path looks like `foldername/foldername/`; the CDN resolves it by name.
+Files are **not** served by path — they always download from
+`https://cdn.osunhive.name.ng/download/<id>`, which `.cdn link` gives you.
 
 Entries marked ✅ are images/videos that WhatsApp Status accepts. Folders and
 Google Docs/Sheets appear in the list but cannot be posted (the CDN only serves
