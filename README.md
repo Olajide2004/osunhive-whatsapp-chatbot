@@ -11,6 +11,7 @@
 [![Stars](https://img.shields.io/github/stars/Olajide2004/osunhive-whatsapp-chatbot?style=for-the-badge&color=25D366)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/stargazers)
 [![Forks](https://img.shields.io/github/forks/Olajide2004/osunhive-whatsapp-chatbot?style=for-the-badge&color=25D366)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/network/members)
 [![Issues](https://img.shields.io/github/issues/Olajide2004/osunhive-whatsapp-chatbot?style=for-the-badge&color=red)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/issues)
+[![CI](https://img.shields.io/github/actions/workflow/status/Olajide2004/osunhive-whatsapp-chatbot/ci.yml?style=for-the-badge&label=CI)](https://github.com/Olajide2004/osunhive-whatsapp-chatbot/actions/workflows/ci.yml)
 
 <img src="assets/banner.svg" width="100%" alt="Osunhive banner"/>
 

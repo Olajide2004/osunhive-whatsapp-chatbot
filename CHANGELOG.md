@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- **Repo automation (`.github`)** — CI runs syntax checks, the 11 offline test
+  suites (Node 20/22) and a source-package leak scan; a tag-driven **Release**
+  workflow builds the source archives; plus issue/PR templates, `SECURITY.md`,
+  `FUNDING.yml`, Dependabot and `CODEOWNERS`. `pnpm test` now runs
+  `scripts/run-tests.js`.
 - **Holiday countdown & fireworks** — `.countdown` shows the days to 🎄 Christmas,
   🎆 New Year and 🌙 Ramadan (fasting); `.countdown christmas|newyear|ramadan`
   zooms in on one. `.fireworks [text]` sends an animated 🎆 fireworks message

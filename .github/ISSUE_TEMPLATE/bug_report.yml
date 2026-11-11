@@ -1,0 +1,81 @@
+name: 🐞 Bug report
+description: Something is broken or behaves unexpectedly.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please **do not paste secrets** (session files,
+        `.env`, API keys, phone numbers). Redact JIDs and numbers.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: When I send `.countdown`, the bot ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start the bot with ...
+        2. Send `.menu`
+        3. Tap ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Bot version / commit
+      placeholder: v2.0.0 or 8b81ca49
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where are you running it?
+      options:
+        - Termux (Android)
+        - Linux VPS
+        - Windows
+        - Docker
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "20.11.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Paste the error/stack trace. Remove secrets first.
+      render: shell
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues first.
+          required: true
+        - label: I removed secrets (session/, .env, keys, numbers) from logs.
+          required: true

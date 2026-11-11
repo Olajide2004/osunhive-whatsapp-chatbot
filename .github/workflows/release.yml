@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)publish, e.g. v2.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish source package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "name=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Build archives (source only)
+        run: |
+          set -e
+          VERSION="${TAG#v}"
+          git archive --format=zip -o "osunhive-v2-${VERSION}-release.zip" "$TAG"
+          git archive --format=tar.gz -o "osunhive-v2-${VERSION}-release.tar.gz" "$TAG"
+
+      - name: Leak scan
+        run: |
+          unzip -l "osunhive-v2-"*"-release.zip" > list.txt
+          if grep -E 'session/|node_modules/|baileys_store|cdnCache|cdnState|messageCount\.json|premium\.json|userName\.json|(^|/)\.env$' list.txt; then
+            echo "::error::Release archive contains runtime or secret files"
+            exit 1
+          fi
+          echo "Leak scan CLEAN"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: Osunhive WhatsApp Chatbot ${{ steps.tag.outputs.name }}
+          generate_release_notes: true
+          files: |
+            osunhive-v2-*-release.zip
+            osunhive-v2-*-release.tar.gz

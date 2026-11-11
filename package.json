@@ -13,10 +13,10 @@
     "start:fresh": "node reset-session.js && node index.js",
     "install:panel": "pnpm install",
     "install:force": "pnpm install --force",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "docker:build": "docker build -t osunhive-chatbot ."
+    "test": "node scripts/run-tests.js",
+    "docker:build": "docker build -t osunhive-chatbot .",
+    "test:list": "node scripts/run-tests.js --list"
   },
-
   "keywords": [
     "whatsapp-bot"
   ],

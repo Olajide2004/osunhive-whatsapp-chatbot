@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖 Documentation
+    url: https://github.com/Olajide2004/osunhive-whatsapp-chatbot/blob/main/USAGE.md
+    about: Command reference, permissions and examples.
+  - name: 🌐 Osunhive website
+    url: https://www.osunhive.name.ng
+    about: Products, services and free coding resources.
+  - name: 🔗 All Osunhive links
+    url: https://yo.fan/osunhivetech
+    about: Social channels and support.
