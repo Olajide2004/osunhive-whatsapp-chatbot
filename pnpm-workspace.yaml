@@ -1,3 +1,11 @@
+# Single-package workspace.
+#
+# `packages` must be present: `actions/setup-node` with `cache: pnpm` runs
+# `pnpm store path`, which fails with "packages field missing or empty" when
+# this file exists but declares no packages.
+packages:
+  - '.'
+
 allowBuilds:
   '@whiskeysockets/baileys': true
   es5-ext: true
