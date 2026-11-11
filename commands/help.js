@@ -4,6 +4,11 @@ const { sendListMenu } = require('../lib/button');
 const WEBSITE = 'https://www.osunhive.name.ng';
 const DEFAULT_CHANNEL = global.channelLink || 'https://whatsapp.com/channel/0029Vb967rbHVvTcm04X9g3x';
 
+// Icon + quote disclaimer shown under menus and the guide.
+const DISCLAIMER =
+    '⚠️ *Disclaimer:* Unofficial bot — not affiliated with WhatsApp/Meta.\n' +
+    '💬 WhatsApp • 🧩 Baileys • 🧠 Osunhive';
+
 const contextInfo = {
     forwardingScore: 1,
     isForwarded: true,
@@ -150,7 +155,8 @@ function sectionText(key) {
         `   *${section.emoji} ${section.title}*\n` +
         `╚═══════════════════╝\n\n` +
         `${lines}\n\n` +
-        `🌐 ${WEBSITE}`
+        `🌐 ${WEBSITE}\n\n` +
+        DISCLAIMER
     );
 }
 
@@ -165,7 +171,7 @@ function fullMenuText() {
                 section.body.map((cmd) => `║ ➤ ${cmd}`).join('\n')
             );
         })
-        .join('\n\n');
+        .join('\n\n') + `\n\n🌐 ${WEBSITE}\n\n${DISCLAIMER}`;
 }
 
 /** Send the interactive main menu (single-select list). */
@@ -176,7 +182,8 @@ async function sendMainMenu(sock, chatId, message) {
             `*🤖 ${settings.botName || 'Osunhive Chatbot'}*\n` +
             `Version *${settings.version || '2.0.0'}* by ${settings.botOwner || 'Osunhive'}\n\n` +
             `Tap *📋 Open Menu* below to browse commands by category.\n\n` +
-            `🌐 ${WEBSITE}`,
+            `🌐 ${WEBSITE}\n\n` +
+            DISCLAIMER,
         footer: `© ${settings.botName || 'Osunhive Chatbot'}`,
         buttonText: '📋 Open Menu',
         sections: [
@@ -303,3 +310,6 @@ async function helpCommand(sock, chatId, message, channelLink, commandText) {
 
 module.exports = helpCommand;
 module.exports.SECTIONS = SECTIONS;
+module.exports.DISCLAIMER = DISCLAIMER;
+module.exports.sectionText = sectionText;
+module.exports.fullMenuText = fullMenuText;

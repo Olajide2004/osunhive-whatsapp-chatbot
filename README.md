@@ -22,6 +22,15 @@
 
 ---
 
+> [!WARNING]
+> ⚠️ **Disclaimer — read before you run.**
+> *Osunhive WhatsApp Chatbot* is an **independent, unofficial** project. It is **not affiliated with, endorsed by, or sponsored by** **WhatsApp LLC**, **Meta Platforms, Inc.** or the **Baileys** project.
+> Automating a WhatsApp account **may violate WhatsApp's Terms of Service** and can get that number **banned**. Always use a **spare number**, and run it **at your own risk**.
+>
+> 🙏 **Acknowledgements & credit** — Built and maintained by **[Osunhive](https://www.osunhive.name.ng)** 🧠, powered by **[Baileys](https://github.com/WhiskeySockets/Baileys)** (the community WhatsApp Web API) 🧩, running on **WhatsApp** 💬. All product names, logos and brands are the property of their respective owners and are used for identification only.
+
+---
+
 ## ✨ Features
 
 | | Area | What it does |
@@ -241,11 +250,12 @@ node test-polls.js
 
 ## 💚 Credits
 
-- 💚 **Built and maintained by Osunhive Technology** — business GitHub: [**@osunhive**](https://github.com/osunhive)
-- 🎓 **Free coding at [www.osunhive.name.ng](https://www.osunhive.name.ng)**
-- 🔗 All links: [**yo.fan/osunhivetech**](https://yo.fan/osunhivetech)
-- 🧩 [**Baileys**](https://github.com/WhiskeySockets/Baileys) — WhatsApp Web API
-- 🙏 Original bot scaffold and community libraries
+- 💬 **[WhatsApp](https://www.whatsapp.com)** (Meta Platforms, Inc.) — the platform this bot automates. **Unofficial; not affiliated with or endorsed by WhatsApp/Meta.**
+- 🧩 **[Baileys](https://github.com/WhiskeySockets/Baileys)** by **WhiskeySockets** — the community WhatsApp Web API this bot is built on.
+- 🧠 **[Osunhive](https://www.osunhive.name.ng)** — created, maintained and funded by Osunhive Technology · business GitHub: [**@osunhive**](https://github.com/osunhive)
+- 🎓 **Free coding at [www.osunhive.name.ng](https://www.osunhive.name.ng)** · 🔗 all links: [**yo.fan/osunhivetech**](https://yo.fan/osunhivetech)
+- 🙏 Original bot scaffold and community libraries whose authors made this possible.
+- ⚖️ All trademarks, logos and brand names are the property of their respective owners and are used for **identification only**.
 
 ---
 
