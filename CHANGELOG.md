@@ -52,7 +52,9 @@
   packages; the repo root is now the single workspace package. The
   `autopoststatus` suite no longer needs a `session/` folder (CI has none), and
   the workflows use the current action majors (checkout v7, setup-node v7,
-  pnpm v6, gh-release v3). (`pnpm-workspace.yaml`, `.github/workflows/*`)
+  pnpm v6, gh-release v3). Dependabot now only proposes **patch-level** npm
+  updates (majors/minors need a human; security updates are unaffected).
+  (`pnpm-workspace.yaml`, `.github/`)
 - **Antidelete media crash** — `downloadContentFromMessage` returns a stream
   in Baileys 7, but the code passed it straight to `fs.writeFile`
   (`ERR_INVALID_ARG_TYPE`), so deleted images/videos/stickers/audio/view-once
