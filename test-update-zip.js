@@ -13,7 +13,7 @@ const os = require('os');
 const path = require('path');
 const zlib = require('zlib');
 
-const { extractZipNode } = require('./commands/update');
+const { extractZipNode, buildRelaunchCommand } = require('./commands/update');
 
 /* ------------------------------------------------------------------ */
 /* Minimal ZIP writer (enough to exercise the reader)                  */
@@ -138,6 +138,25 @@ function main() {
         /not a ZIP file/, 'rejects non-zip input');
 
     fs.rmSync(tmp, { recursive: true, force: true });
+
+    // Restart helper: detached relaunch command (used when pm2 is absent).
+    assert.strictEqual(
+        buildRelaunchCommand('/usr/bin/node', ['index.js'], 2000),
+        "sleep 2; exec '/usr/bin/node' 'index.js'"
+    );
+    assert.strictEqual(
+        buildRelaunchCommand('/usr/bin/node', [], 2500),
+        "sleep 3; exec '/usr/bin/node'",
+        'delay rounds up to whole seconds'
+    );
+    const spaced = buildRelaunchCommand('/opt/my node/node', ['a b.js'], 1000);
+    assert.ok(spaced.includes("'/opt/my node/node'"), 'spaces in exec path are quoted');
+    assert.ok(spaced.includes("'a b.js'"), 'spaces in args are quoted');
+    assert.ok(
+        buildRelaunchCommand("/o'brien/node", [], 1000).includes("'/o'\\''brien/node'"),
+        'single quotes are escaped'
+    );
+
     console.log('✅ all update-zip tests passed');
 }
 

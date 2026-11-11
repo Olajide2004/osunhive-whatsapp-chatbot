@@ -371,6 +371,41 @@ async function compareCommits(slug, localSha, remoteSha) {
     }
 }
 
+/** Build a detached shell command that waits for this process to die, then restarts it. */
+function buildRelaunchCommand(execPath = process.execPath, argv = process.argv.slice(1), delayMs = 2000) {
+    const quote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`;
+    const args = argv.map(quote).join(' ');
+    return `sleep ${Math.max(1, Math.round(delayMs / 1000))}; exec ${quote(execPath)}${args ? ' ' + args : ''}`;
+}
+
+/**
+ * Restart without pm2: spawn a detached child that waits a moment for this
+ * process to release the session, then starts the bot again. Log output is
+ * appended to `temp/bot.log` so it is not lost.
+ */
+function relaunchDetached(delayMs = 2000) {
+    const childProcess = require('child_process');
+    let stdio = 'ignore';
+    let fd = null;
+    try {
+        const logDir = path.join(__dirname, '..', 'temp');
+        fs.mkdirSync(logDir, { recursive: true });
+        fd = fs.openSync(path.join(logDir, 'bot.log'), 'a');
+        stdio = ['ignore', fd, fd];
+    } catch {
+        /* no log file, just run quietly */
+    }
+
+    const child = childProcess.spawn('/bin/sh', ['-c', buildRelaunchCommand(process.execPath, process.argv.slice(1), delayMs)], {
+        cwd: path.join(__dirname, '..'),
+        detached: true,
+        stdio,
+        env: process.env
+    });
+    child.unref();
+    return child.pid;
+}
+
 async function restartProcess(sock, chatId, message) {
     try {
         await sock.sendMessage(chatId, { text: '✅ Update complete! Restarting Osunhive Chatbot…' }, { quoted: message });
@@ -379,6 +414,11 @@ async function restartProcess(sock, chatId, message) {
         await run('pm2 restart all');
         return;
     } catch {}
+    try {
+        relaunchDetached();
+    } catch (error) {
+        console.warn('[update] could not relaunch automatically:', error.message);
+    }
     setTimeout(() => {
         process.exit(0);
     }, 800);
@@ -484,3 +524,5 @@ async function updateCommand(sock, chatId, message, zipOverride) {
 module.exports = updateCommand;
 module.exports.extractZip = extractZip;
 module.exports.extractZipNode = extractZipNode;
+module.exports.buildRelaunchCommand = buildRelaunchCommand;
+module.exports.relaunchDetached = relaunchDetached;

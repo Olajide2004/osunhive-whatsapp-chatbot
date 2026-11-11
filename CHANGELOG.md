@@ -43,6 +43,16 @@
   🛍️ Osunhive section in the interactive menu.
 
 ### Fixed
+- **`.update` restarts the bot without pm2** — on Termux/VPS setups without
+  pm2 the process used to exit and stay down. It now spawns a detached child
+  (`sleep 2; exec node index.js`, session-safe) with output appended to
+  `temp/bot.log`, so the bot comes back on its own. (`commands/update.js`)
+- **CI on a fresh clone** — `actions/setup-node` with `cache: pnpm` failed with
+  *"packages field missing or empty"* because `pnpm-workspace.yaml` declared no
+  packages; the repo root is now the single workspace package. The
+  `autopoststatus` suite no longer needs a `session/` folder (CI has none), and
+  the workflows use the current action majors (checkout v7, setup-node v7,
+  pnpm v6, gh-release v3). (`pnpm-workspace.yaml`, `.github/workflows/*`)
 - **Antidelete media crash** — `downloadContentFromMessage` returns a stream
   in Baileys 7, but the code passed it straight to `fs.writeFile`
   (`ERR_INVALID_ARG_TYPE`), so deleted images/videos/stickers/audio/view-once
