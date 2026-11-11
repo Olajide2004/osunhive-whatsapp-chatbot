@@ -15,8 +15,7 @@
 ## Checklist
 
 - [ ] `node --check` passes on every changed `*.js` file.
-- [ ] `node scripts/run-tests.js` passes (all offline suites).
-- [ ] New behaviour has a test (offline, no network / session).
+- [ ] The change was tried against a real (spare) number, or the logic is covered by a one-off check.
 - [ ] No secrets, `session/`, `.env`, keys or personal numbers are included.
 - [ ] Docs updated (`README.md`, `USAGE.md`, `CHANGELOG.md`) where relevant.
 

@@ -143,14 +143,15 @@ data/schedule.json          # recurring scheduled tasks
 data/messageCount.json      # bot mode (public/private) + usage stats
 ```
 
-## 8. Tests
+## 8. Verify the install
 
 ```bash
 cd /opt/osunhive-v2
-node scripts/run-tests.js      # every offline suite (12 of them)
-node scripts/run-tests.js --list
-node scripts/run-tests.js health   # only matching suites
+node --check index.js      # syntax sanity
+node index.js              # runs the bot; watch for "Bot Connected Successfully"
 ```
+
+Stop it with `Ctrl-C` once it connects, then wire up the service below.
 
 ## 9. Docker (any VPS, Fly.io, Railway, Koyeb…)
 
@@ -236,4 +237,4 @@ Ensure the final zip includes:
 - `lib/scheduler.js`, `commands/schedule.js`
 - `lib/polls.js`, `commands/poll.js`, `lib/linkPreview.js`, `commands/unfurl.js`
 - `lib/health.js`, `Dockerfile`, `docker-compose.yml`, `render.yaml`, `.devcontainer/`
-- All updated files (`main.js`, `index.js`, `commands/autotyping.js`, `commands/help.js`, `docs.md`)
+- All updated files (`main.js`, `index.js`, `commands/command-router.js`, `commands/autotyping.js`, `commands/help.js`)

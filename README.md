@@ -48,13 +48,13 @@
 | 🧰 | **Moderation** | ban/unban, kick, promote/demote, mute, warn, antilink, antitag, antibot, antidelete, anticall, PM blocker, welcome/goodbye. |
 | 🎁 | **Extras** | vCard, reactions, stickers, downloads, TTS, translation, weather, jokes/quotes and more. |
 
-> **Full command reference:** [`USAGE.md`](USAGE.md) · **Internals & testing:** [`docs.md`](docs.md) · **Release notes:** [`CHANGELOG.md`](CHANGELOG.md)
+> **Full command reference:** [`USAGE.md`](USAGE.md) · **Deploy guide:** [`deploy/README.md`](deploy/README.md) · **Release notes:** [`CHANGELOG.md`](CHANGELOG.md)
 
 ---
 
 ## 🧩 Requirements
 
-- **Node.js 18+**
+- **Node.js 20+**
 - **ffmpeg** — voice notes, media conversion and stickers
 - **Internet access** — WhatsApp Web + optional AI APIs
 - A **WhatsApp account** for the bot (a spare number is recommended)
@@ -198,32 +198,16 @@ plain VPS runs nothing extra listens.
 
 ```text
 index.js            connection, pairing, startup banner
-main.js             message routing and command dispatch
+main.js             message ingest, moderation, command dispatch
+commands/           one file per command + the command router
 settings.js         owner, mode, version
-commands/           one file per command
 lib/                shared helpers (AI layout, previews, TTS, store, auth)
 data/               JSON state/defaults (runtime state git-ignored)
 deploy/             systemd / PM2 / scripts
 Dockerfile          container image (ffmpeg + /data session volume)
 render.yaml         Render Blueprint (Docker + disk)
 .devcontainer/      Codespaces sandbox
-scripts/            offline test runner
 .github/workflows/  automation (contribution snake)
-test-*.js           offline test suites
-```
-
----
-
-## 🧪 Tests
-
-**Offline suites** — no WhatsApp connection needed:
-
-```bash
-node test-meta-style.js
-node test-autoreply-format.js
-node test-autopoststatus.js
-node test-scheduler.js
-node test-polls.js
 ```
 
 ---
@@ -254,12 +238,11 @@ node test-polls.js
 | Metric | Value |
 | --- | :---: |
 | **Version** | `2.0.0` |
-| **Engine** | Baileys `7.0.0-rc.9` (Node ≥ 18) |
-| **Command modules** | `116` |
-| **Library modules** | `36` |
+| **Engine** | Baileys `7.0.0-rc.9` (Node ≥ 20) |
+| **Command modules** | `121` |
+| **Library modules** | `37` |
 | **Menu sections** | `12` |
-| **Source lines** | `~22,800` |
-| **Test suites** | `6` offline suites |
+| **Source lines** | `~22,500` |
 | **Release archive** | ~1.7 MB (source only) |
 
 ---

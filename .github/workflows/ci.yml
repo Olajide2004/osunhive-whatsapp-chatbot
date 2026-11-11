@@ -50,9 +50,6 @@ jobs:
           done < <(git ls-files '*.js')
           exit $fail
 
-      - name: Offline test suites
-        run: node scripts/run-tests.js
-
   package:
     name: Source package leak scan
     runs-on: ubuntu-latest

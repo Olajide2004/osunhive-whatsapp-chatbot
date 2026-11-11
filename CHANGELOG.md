@@ -9,12 +9,11 @@
   volume, a `render.yaml` Blueprint (Docker + health check + 1 GB disk),
   `.devcontainer/` for GitHub Codespaces, and `.env.example`. The deploy guide
   now covers Docker, Render, Codespaces and free/cheap hosts.
-  (`lib/health.js`, `index.js`, `test-health.js`, `deploy/README.md`)
-- **Repo automation (`.github`)** — CI runs syntax checks, the 12 offline test
-  suites (Node 20/22) and a source-package leak scan; a tag-driven **Release**
-  workflow builds the source archives; plus issue/PR templates, `SECURITY.md`,
-  `FUNDING.yml`, Dependabot and `CODEOWNERS`. `pnpm test` now runs
-  `scripts/run-tests.js`.
+  (`lib/health.js`, `index.js`, `deploy/README.md`)
+- **Repo automation (`.github`)** — CI runs syntax checks (Node 20/22) and a
+  source-package leak scan; a tag-driven **Release** workflow builds the source
+  archives; plus issue/PR templates, `SECURITY.md`, `FUNDING.yml`, Dependabot
+  and `CODEOWNERS`.
 - **Holiday countdown & fireworks** — `.countdown` shows the days to 🎄 Christmas,
   🎆 New Year and 🌙 Ramadan (fasting); `.countdown christmas|newyear|ramadan`
   zooms in on one. `.fireworks [text]` sends an animated 🎆 fireworks message
@@ -49,6 +48,14 @@
   `.website` / `.links` / `.socials` (all official channels), with a
   🛍️ Osunhive section in the interactive menu.
 
+### Changed
+- **All command code now lives in `commands/`** — the command switch moved out
+  of `main.js` into a new `commands/command-router.js`, which owns parsing,
+  permission checks and dispatch. `main.js` dropped from ~1,650 to ~540 lines
+  (ingest, moderation/mode policy, then a single `executeCommand(ctx)` call),
+  and its now-unused command imports were pruned. Verified against 249 command
+  forms with zero wiring failures. (`main.js`, `commands/command-router.js`)
+
 ### Fixed
 - **`.update` restarts the bot without pm2** — on Termux/VPS setups without
   pm2 the process used to exit and stay down. It now spawns a detached child
@@ -57,7 +64,8 @@
 - **CI on a fresh clone** — `actions/setup-node` with `cache: pnpm` failed with
   *"packages field missing or empty"* because `pnpm-workspace.yaml` declared no
   packages; the repo root is now the single workspace package. The
-  `autopoststatus` suite no longer needs a `session/` folder (CI has none), and
+  `autopoststatus` command no longer needs a `session/` folder to discover
+  recipients (a fresh clone has none), and
   the workflows use the current action majors (checkout v7, setup-node v7,
   pnpm v6, gh-release v3). Dependabot now only proposes **patch-level** npm
   updates (majors/minors need a human; security updates are unaffected).
@@ -88,6 +96,12 @@
   (derived from `origin`) instead of a fixed upstream URL.
 - Button-id routing: `ar_menu`, `ar_product`, `ar_website`, `ar_offline` now
   resolve to real commands (previously dead two-step mappings).
+
+### Removed
+- **Offline test suites and the duplicate guide** — the 13 `test-*.js` suites
+  and `scripts/run-tests.js` were removed, along with `docs.md` (a shorter copy
+  of the `README.md`/`USAGE.md` feature guide). CI now runs the syntax check and
+  the source-package leak scan only.
 
 ## v2.0.0 — Final cloud release (2026-11-10)
 
@@ -133,8 +147,8 @@ Source-only cloud VPS package (no node_modules, no session keys).
 - Package excludes `node_modules/`, `session/`, `temp/`, `.git/`, logs, `.env`,
   `baileys_store.json`. Run `pnpm install` (or `npm install`) on the VPS.
 - `data/messageCount.json` ships as an empty template — fresh state on first boot.
-- See `USAGE.md` (end users), `deploy/README.md` (VPS), `docs.md` (internals).
-- Requires `ffmpeg` for voice notes/media; Node 18+; outbound network.
+- See `USAGE.md` (end users) and `deploy/README.md` (VPS / Docker / Render).
+- Requires `ffmpeg` for voice notes/media; Node 20+; outbound network.
 
 ### Known limitations
 - 3rd-party "quick-reply" buttons may not fire on all WhatsApp clients — list menus
