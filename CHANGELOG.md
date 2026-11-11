@@ -29,6 +29,17 @@
   🛍️ Osunhive section in the interactive menu.
 
 ### Fixed
+- **Antidelete media crash** — `downloadContentFromMessage` returns a stream
+  in Baileys 7, but the code passed it straight to `fs.writeFile`
+  (`ERR_INVALID_ARG_TYPE`), so deleted images/videos/stickers/audio/view-once
+  were never captured. Media is now buffered from the stream, with a 64 MB
+  cap, and a failed download no longer loses the message text.
+  (`commands/antidelete.js`)
+- **Antidelete reports went to the bot's own number** instead of the owner —
+  they now go to `settings.ownerNumber` (falling back to the bot). Also hardened:
+  guards for missing keys/`sock.user`, group-metadata failures, protocol
+  messages are not stored, status/newsletter traffic is skipped, and the
+  in-memory store is capped at 500 entries / 24 h with temp-media cleanup.
 - **`.update` no longer needs an external unzip tool** — when the bot is a
   source-only install (no `.git`) and the device has no `unzip`/`7z`/`busybox`,
   the ZIP is now unpacked by a **built-in pure-Node ZIP reader** (`zlib`), so
