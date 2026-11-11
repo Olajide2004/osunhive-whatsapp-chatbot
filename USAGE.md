@@ -251,7 +251,13 @@ can walk in and out like a file manager:
 .cdn 4                     # post entry #4 to Status (image/video only)
 .cdn 4 | My caption        # …with a caption
 .cdn post 4                # same as `.cdn 4`
+.cdn buttons on|off        # interactive buttons under the listing (default on)
 ```
+
+The listing now ships **buttons**: `📂 #n` / `📤 #n` shortcuts for folders and
+postable media on the page, plus `⬆️ Up`, `🏠 Root`, `🔄 Refresh`,
+`➡️ Page n` and a `🌐 Osunhive` website button. Turn them off with
+`.cdn buttons off`.
 
 A folder path looks like `foldername/foldername/`; the CDN resolves it by name.
 Files are **not** served by path — they always download from
@@ -339,6 +345,7 @@ Require group admin (bot must be admin for actions on members).
 
 ```
 .mode public|private        .settings            .update
+.update check               # compare local commit with GitHub
 .clearsession               .cleartmp            .antidelete <on/off>
 .setpp (reply to image)     .autoreact <on/off>  .autoread <on/off>
 .autostatus <on/off>        .autostatus react <on/off>

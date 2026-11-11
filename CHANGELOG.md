@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **CDN browser buttons** — `.cdn` listings now ship interactive buttons:
+  `📂 #n` / `📤 #n` shortcuts, `⬆️ Up`, `🏠 Root`, `🔄 Refresh`, `➡️ Page n`
+  and a `🌐 Osunhive` link. Toggle with `.cdn buttons on|off`.
+  (`commands/cdn.js`, `main.js`)
 - **CDN browser** — `.cdn` browses the Osunhive CDN
   (https://cdn.osunhive.name.ng) from WhatsApp with **folder-path navigation**:
   `.cdn <n>` opens a folder or posts a media file, `.cdn <folder/path>` opens a
@@ -25,6 +29,14 @@
   🛍️ Osunhive section in the interactive menu.
 
 ### Fixed
+- **`.update check` now really compares commits** — it reads the local `HEAD`,
+  queries the repo from `origin` (not a hardcoded upstream), reports local vs
+  remote SHAs and how many commits behind you are, and distinguishes
+  "up to date", "update available" and "local ahead (unpushed)". GitHub API
+  errors are surfaced instead of being reported as "up to date".
+  (`commands/update.js`)
+- **`.update` ZIP fallback** now downloads from the repo it was cloned from
+  (derived from `origin`) instead of a fixed upstream URL.
 - Button-id routing: `ar_menu`, `ar_product`, `ar_website`, `ar_offline` now
   resolve to real commands (previously dead two-step mappings).
 

@@ -27,17 +27,21 @@
 
 const fs = require('fs');
 const path = require('path');
+const settings = require('../settings');
 const isOwnerOrSudo = require('../lib/isOwner');
 const store = require('../lib/lightweight_store');
+const { sendCtaButtons } = require('../lib/button');
 const { downloadUrlMedia, postUrlStatus } = require('./autopoststatus');
 
 const CDN_BASE = 'https://cdn.osunhive.name.ng';
+const WEBSITE = 'https://www.osunhive.name.ng';
 const cachePath = path.join(__dirname, '..', 'data', 'cdnCache.json');
 const statePath = path.join(__dirname, '..', 'data', 'cdnState.json');
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_BUFFER = 80 * 1024 * 1024;
+const MAX_QUICK_REPLIES = 6;
 
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const GDRIVE_MIME = /^application\/vnd\.google-apps\./;
@@ -194,6 +198,21 @@ function setCurrentPath(chatId, folderPath) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Buttons toggle (stored alongside the per-chat paths)                */
+/* ------------------------------------------------------------------ */
+
+function buttonsEnabled() {
+    const all = getState();
+    return all.__buttons__ !== false;
+}
+
+function setButtonsEnabled(value) {
+    const all = getState();
+    all.__buttons__ = !!value;
+    writeJson(statePath, all);
+}
+
+/* ------------------------------------------------------------------ */
 /* Formatting helpers                                                  */
 /* ------------------------------------------------------------------ */
 
@@ -239,7 +258,7 @@ function shortName(name, max = 42) {
     return clean.length > max ? clean.slice(0, max - 1) + '…' : clean;
 }
 
-function listingText(items, folderPath, page, fetchedAt) {
+function listingText(items, folderPath, page, fetchedAt, options = {}) {
     const total = items.length;
     const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const current = Math.min(Math.max(1, page), pages);
@@ -264,21 +283,65 @@ function listingText(items, folderPath, page, fetchedAt) {
     }, {});
     const info = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ') || 'empty';
 
+    const footer = options.compact
+        ? `\n_Tap a button below, or send \`.cdn <n>\`._`
+        : `\n*What now?*\n` +
+          `• \`.cdn <n>\` — open a folder / post a media file\n` +
+          `• \`.cdn send <n>\` — send it to this chat\n` +
+          `• \`.cdn link <n>\` — direct link\n` +
+          `• \`.cdn info <n>\` — details\n` +
+          (pages > 1 ? `• \`.cdn page <n>\` — other pages\n` : '') +
+          (folderPath ? `• \`.cdn back\` — up one folder\n` : '') +
+          `✅ = can be posted as a status.`;
+
     return (
         `🗂️ *Osunhive CDN* — ${where}` +
         `${pages > 1 ? ` (page ${current}/${pages})` : ''}\n` +
         `_${total ? info : 'This folder is empty'} • fetched ${when}_\n\n` +
         upLine +
         (lines.length ? lines.join('\n') + '\n' : '') +
-        `\n*What now?*\n` +
-        `• \`.cdn <n>\` — open a folder / post a media file\n` +
-        `• \`.cdn send <n>\` — send it to this chat\n` +
-        `• \`.cdn link <n>\` — direct link\n` +
-        `• \`.cdn info <n>\` — details\n` +
-        (pages > 1 ? `• \`.cdn page <n>\` — other pages\n` : '') +
-        (folderPath ? `• \`.cdn back\` — up one folder\n` : '') +
-        `✅ = can be posted as a status.`
+        footer
     );
+}
+
+/**
+ * Quick-reply buttons for the current page: folder/media shortcuts plus
+ * navigation. Ids are either real commands (`.cdn <n>`) or aliases that
+ * main.js resolves (`cdn_up`, `cdn_root`, `cdn_refresh`).
+ */
+function buildQuickReplies(items, folderPath, page) {
+    const total = items.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const current = Math.min(Math.max(1, page), pages);
+    const start = (current - 1) * PAGE_SIZE;
+    const slice = items.slice(start, start + PAGE_SIZE);
+
+    const quick = [];
+
+    slice.forEach((item, i) => {
+        if (quick.length >= 2) return;
+        if (item.mimeType === FOLDER_MIME) {
+            quick.push({ id: `.cdn ${start + i + 1}`, text: `📂 #${start + i + 1}` });
+        }
+    });
+    slice.forEach((item, i) => {
+        if (quick.filter((b) => b.text.startsWith('📤')).length >= 2) return;
+        if (isPostable(item.mimeType)) {
+            quick.push({ id: `.cdn ${start + i + 1}`, text: `📤 #${start + i + 1}` });
+        }
+    });
+
+    if (folderPath) {
+        quick.push({ id: '.cdn up', text: '⬆️ Up' });
+        quick.push({ id: '.cdn root', text: '🏠 Root' });
+    }
+    quick.push({ id: '.cdn refresh', text: '🔄 Refresh' });
+    if (pages > 1) {
+        const next = current < pages ? current + 1 : 1;
+        quick.push({ id: `.cdn page ${next}`, text: `➡️ Page ${next}` });
+    }
+
+    return quick.slice(0, MAX_QUICK_REPLIES);
 }
 
 function infoText(n, item) {
@@ -329,6 +392,7 @@ function parseCommand(body) {
     }
     if (word === 'page') return { action: 'list', page: rest ? Number(rest) : 1 };
     if (word === 'refresh') return { action: 'refresh', path: rest ? normalizePath(rest) : undefined };
+    if (word === 'buttons') return { action: 'buttons', mode: (rest || 'toggle').toLowerCase() };
     if (['info', 'link', 'send', 'post'].includes(word)) {
         return { action: word, index: /^\d+$/.test(rest) ? Number(rest) : null, caption };
     }
@@ -367,11 +431,35 @@ async function cdnCommand(sock, chatId, message) {
                 return reply(`❌ Could not open *${folderPath || 'root'}*: ${error.message}`);
             }
             setCurrentPath(chatId, folderPath);
-            return reply(listingText(listing.items, folderPath, page, listing.fetchedAt));
+
+            if (!buttonsEnabled()) {
+                return reply(listingText(listing.items, folderPath, page, listing.fetchedAt));
+            }
+
+            try {
+                return await sendCtaButtons(sock, chatId, {
+                    text: listingText(listing.items, folderPath, page, listing.fetchedAt, { compact: true }),
+                    footer: `© ${settings.botName || 'Osunhive Chatbot'}`,
+                    ctaUrl: WEBSITE,
+                    ctaUrlText: '🌐 Osunhive',
+                    quickReplies: buildQuickReplies(listing.items, folderPath, page),
+                    quoted: message
+                });
+            } catch (error) {
+                console.warn('[cdn] buttons failed, sending text:', error.message);
+                return reply(listingText(listing.items, folderPath, page, listing.fetchedAt));
+            }
         };
 
         const current = getCurrentPath(chatId);
 
+        if (cmd.action === 'buttons') {
+            if (['on', 'enable', 'yes'].includes(cmd.mode)) setButtonsEnabled(true);
+            else if (['off', 'disable', 'no'].includes(cmd.mode)) setButtonsEnabled(false);
+            else if (cmd.mode === 'toggle') setButtonsEnabled(!buttonsEnabled());
+            else return reply('❌ Use `.cdn buttons on|off`');
+            return reply(`🔘 CDN buttons: *${buttonsEnabled() ? 'ON' : 'OFF'}*`);
+        }
         if (cmd.action === 'path') {
             return reply(`📂 Current CDN folder: *${current || 'root'}*`);
         }
@@ -482,6 +570,7 @@ module.exports = cdnCommand;
 module.exports.fetchListing = fetchListing;
 module.exports.parseCommand = parseCommand;
 module.exports.listingText = listingText;
+module.exports.buildQuickReplies = buildQuickReplies;
 module.exports.isPostable = isPostable;
 module.exports.normalizePath = normalizePath;
 module.exports.parentPath = parentPath;

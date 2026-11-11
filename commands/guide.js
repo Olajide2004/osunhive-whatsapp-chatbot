@@ -80,7 +80,8 @@ const GUIDE_FULL = [
     `.cdn <folder/path> — open by name\n` +
     `.cdn .. | back — up one folder\n` +
     `.cdn / | root — back to the CDN root\n` +
-    `.cdn link|send|info <n> — link, file, details`,
+    `.cdn link|send|info <n> — link, file, details\n` +
+    `.cdn buttons on|off — interactive buttons`,
 
     `*Scheduled tasks*\n` +
     `.schedule add here every 30m text Reminder\n` +

@@ -255,7 +255,14 @@ const BUTTON_LABELS = {
     '🌐 website': 'ar_website',
     'website': 'ar_website',
     '💡 faqs': 'ar_offline',
-    'offline': 'ar_offline'
+    'offline': 'ar_offline',
+    // CDN browser buttons
+    '⬆️ up': '.cdn up',
+    'up': '.cdn up',
+    '🏠 root': '.cdn root',
+    'root': '.cdn root',
+    '🔄 refresh': '.cdn refresh',
+    'refresh': '.cdn refresh'
 };
 
 function normalizeButtonLabel(text) {
@@ -396,6 +403,15 @@ async function handleMessages(sock, messageUpdate, printLog) {
         if (!buttonCommand && rawIncoming) {
             const labelId = BUTTON_LABELS[normalizeButtonLabel(rawIncoming)];
             if (labelId) buttonCommand = resolveButtonCommand(labelId);
+
+            // CDN dynamic labels: "📂 #3", "📤 #3", "➡️ Page 2"
+            if (!buttonCommand) {
+                const norm = normalizeButtonLabel(rawIncoming);
+                const entry = /^(?:📂|📤)\s*#?(\d+)$/.exec(norm);
+                const page = /^(?:➡️|▶️|➡)\s*page\s*(\d+)$/.exec(norm);
+                if (entry) buttonCommand = `.cdn ${entry[1]}`;
+                else if (page) buttonCommand = `.cdn page ${page[1]}`;
+            }
         }
 
         // Diagnostics: a structured reply arrived but we could not decode it.

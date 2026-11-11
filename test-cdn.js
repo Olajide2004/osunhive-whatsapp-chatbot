@@ -56,7 +56,7 @@ try { fs.unlinkSync(cachePath); } catch { /* ignore */ }
 try { fs.unlinkSync(statePath); } catch { /* ignore */ }
 
 const cdnCommand = require('./commands/cdn');
-const { parseCommand, listingText, isPostable, normalizePath, parentPath, joinPath, cdnUrlForPath } = cdnCommand;
+const { parseCommand, listingText, isPostable, normalizePath, parentPath, joinPath, cdnUrlForPath, buildQuickReplies } = cdnCommand;
 
 // --- mock socket ----------------------------------------------------------
 const sent = [];
@@ -101,6 +101,16 @@ async function main() {
     assert.deepStrictEqual(parseCommand('open 2'), { action: 'open', index: 2 });
     assert.deepStrictEqual(parseCommand('open A/B'), { action: 'open', path: 'A/B' });
     assert.deepStrictEqual(parseCommand('GDrive Upload BOT'), { action: 'open', path: 'GDrive Upload BOT' });
+    assert.deepStrictEqual(parseCommand('buttons on'), { action: 'buttons', mode: 'on' });
+    assert.deepStrictEqual(parseCommand('buttons'), { action: 'buttons', mode: 'toggle' });
+
+    // --- quick-reply buttons for a page ---------------------------------
+    const quick = buildQuickReplies(FOLDER_A, 'Folder A', 1);
+    const qtext = quick.map((b) => b.text).join(' | ');
+    assert.ok(qtext.includes('📤'), 'media shortcut present');
+    assert.ok(qtext.includes('⬆️ Up') && qtext.includes('🏠 Root') && qtext.includes('🔄 Refresh'), 'nav buttons present');
+    assert.ok(quick.every((b) => b.id.startsWith('.cdn ')), 'ids are commands');
+    assert.ok(quick.length <= 6, 'quick replies capped');
 
     // --- isPostable / listingText ----------------------------------------
     assert.ok(isPostable('video/mp4') && isPostable('image/png'));
@@ -189,6 +199,19 @@ async function main() {
     reset();
     await run('.cdn 99');
     assert.ok(/No entry #99/.test(lastText()), 'bad index handled');
+
+    // --- buttons toggle ---------------------------------------------------
+    reset();
+    await run('.cdn buttons off');
+    assert.ok(/CDN buttons: \*OFF\*/.test(lastText()), 'buttons off');
+
+    reset();
+    await run('.cdn root');
+    assert.ok(lastText().includes('What now?'), 'plain text when buttons off');
+
+    reset();
+    await run('.cdn buttons on');
+    assert.ok(/CDN buttons: \*ON\*/.test(lastText()), 'buttons on');
 
     console.log('✅ all cdn tests passed');
 }

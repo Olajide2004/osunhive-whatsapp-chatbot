@@ -48,7 +48,7 @@ async function updateViaGit() {
     const commits = alreadyUpToDate ? '' : await run(`git log --pretty=format:"%h %s (%an)" ${oldRev}..${newRev}`).catch(() => '');
     const files = alreadyUpToDate ? '' : await run(`git diff --name-status ${oldRev} ${newRev}`).catch(() => '');
     await run(`git reset --hard ${newRev}`);
-    await run('git clean -fd');
+    await run('git clean -fd -e node_modules -e session -e tmp -e temp -e data -e .env');
     return { oldRev, newRev, alreadyUpToDate, commits, files };
 }
 
@@ -135,14 +135,22 @@ function copyRecursive(src, dest, ignore = [], relative = '', outList = []) {
 }
 
 async function updateViaZip(sock, chatId, message, zipOverride) {
-    const zipUrl = (zipOverride || settings.updateZipUrl || process.env.UPDATE_ZIP_URL || '').trim();
-    if (!zipUrl) {
+    const zipUrl = (zipOverride || process.env.UPDATE_ZIP_URL || '').trim();
+    let resolvedZipUrl = zipUrl;
+    if (!resolvedZipUrl) {
+        try {
+            const slug = await getRepoSlug();
+            resolvedZipUrl = `https://github.com/${slug}/archive/refs/heads/main.zip`;
+        } catch { /* fall back below */ }
+    }
+    if (!resolvedZipUrl) resolvedZipUrl = (settings.updateZipUrl || '').trim();
+    if (!resolvedZipUrl) {
         throw new Error('No ZIP URL configured. Set settings.updateZipUrl or UPDATE_ZIP_URL env.');
     }
     const tmpDir = path.join(process.cwd(), 'tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
     const zipPath = path.join(tmpDir, 'update.zip');
-    await downloadFile(zipUrl, zipPath);
+    await downloadFile(resolvedZipUrl, zipPath);
     const extractTo = path.join(tmpDir, 'update_extract');
     if (fs.existsSync(extractTo)) fs.rmSync(extractTo, { recursive: true, force: true });
     await extractZip(zipPath, extractTo);
@@ -184,9 +192,26 @@ async function updateViaZip(sock, chatId, message, zipOverride) {
     return { copiedFiles: copied };
 }
 
-async function checkRemoteUpdate() {
+async function getRepoSlug() {
+    try {
+        const url = (await run('git remote get-url origin')).trim();
+        const m = /github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?\/?$/i.exec(url);
+        if (m) return `${m[1]}/${m[2]}`;
+    } catch { /* not a git repo */ }
+    return settings.githubRepo || 'Osunhive/osunhive-whatsapp-chatbot';
+}
+
+async function getLocalSha() {
+    try {
+        return (await run('git rev-parse HEAD')).trim();
+    } catch {
+        return null;
+    }
+}
+
+function githubJson(url) {
     return new Promise((resolve, reject) => {
-        const req = https.get('https://api.github.com/repos/Osunhive/osunhive-whatsapp-chatbot/commits/main', {
+        const req = https.get(url, {
             headers: {
                 'User-Agent': 'Osunhive-Updater/2.0',
                 'Accept': 'application/vnd.github.v3+json'
@@ -195,15 +220,41 @@ async function checkRemoteUpdate() {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
+                let body;
                 try {
-                    resolve(JSON.parse(data));
-                } catch (e) {
-                    reject(e);
+                    body = JSON.parse(data);
+                } catch {
+                    return reject(new Error(`Invalid response from GitHub (HTTP ${res.statusCode})`));
                 }
+                if (res.statusCode >= 400) {
+                    return reject(new Error(body.message || `GitHub HTTP ${res.statusCode}`));
+                }
+                resolve(body);
             });
         });
         req.on('error', reject);
+        req.setTimeout(15000, () => req.destroy(new Error('GitHub request timed out')));
     });
+}
+
+async function checkRemoteUpdate(repo) {
+    const slug = repo || await getRepoSlug();
+    const remote = await githubJson(`https://api.github.com/repos/${slug}/commits/main`);
+    return { slug, remote };
+}
+
+/** Compare the local checkout with the remote tip (best effort). */
+async function compareCommits(slug, localSha, remoteSha) {
+    if (!localSha || !remoteSha || localSha === remoteSha) return { behind: 0, ahead: 0 };
+    try {
+        const cmp = await githubJson(`https://api.github.com/repos/${slug}/compare/${localSha}...${remoteSha}`);
+        return {
+            behind: typeof cmp.behind_by === 'number' ? cmp.behind_by : null,
+            ahead: typeof cmp.ahead_by === 'number' ? cmp.ahead_by : null
+        };
+    } catch {
+        return { behind: null, ahead: null };
+    }
 }
 
 async function restartProcess(sock, chatId, message) {
@@ -235,22 +286,41 @@ async function updateCommand(sock, chatId, message, zipOverride) {
     // Check subcommand: .update check
     if (args[0] === 'check' || args[0] === '-c') {
         try {
-            await sock.sendMessage(chatId, { text: '🔍 Checking for Osunhive Chatbot updates…' }, { quoted: message });
-            const remote = await checkRemoteUpdate();
-            if (remote && remote.sha) {
-                const shortSha = remote.sha.substring(0, 7);
-                const commitMsg = remote.commit?.message?.split('\n')[0] || '';
-                const date = remote.commit?.committer?.date || '';
-                const reply = `*🤖 Osunhive Chatbot Update Status*\n\n` +
-                              `• *Current Version:* ${settings.version || '2.0.0'}\n` +
-                              `• *Latest GitHub Commit:* ${shortSha}\n` +
-                              `• *Commit Message:* ${commitMsg}\n` +
-                              `• *Updated On:* ${date}\n\n` +
-                              `_To apply this update, reply with *.update*_`;
-                await sock.sendMessage(chatId, { text: reply }, { quoted: message });
-            } else {
-                await sock.sendMessage(chatId, { text: '✅ Osunhive Chatbot is up to date!' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: '🔍 Checking for Osunhive Chatbot updates...' }, { quoted: message });
+
+            const { slug, remote } = await checkRemoteUpdate();
+            const localSha = await getLocalSha();
+            const remoteSha = remote?.sha || null;
+            const same = !!(localSha && remoteSha && localSha === remoteSha);
+            const cmp = same ? { behind: 0, ahead: 0 } : await compareCommits(slug, localSha, remoteSha);
+
+            const report = [
+                '*🤖 Osunhive Chatbot Update Status*',
+                '',
+                `• *Version:* ${settings.version || '2.0.0'}`,
+                `• *Repository:* \`${slug}\``,
+                `• *Local commit:* ${localSha ? localSha.substring(0, 7) : '_not a git checkout_'}`,
+                `• *Remote commit:* ${remoteSha ? remoteSha.substring(0, 7) : '_unknown_'}`
+            ];
+            if (remote?.commit?.message) {
+                report.push(`• *Latest change:* ${remote.commit.message.split('\n')[0]}`);
             }
+            if (remote?.commit?.committer?.date) {
+                report.push(`• *Updated on:* ${remote.commit.committer.date}`);
+            }
+            report.push('');
+            if (!localSha) {
+                report.push('ℹ️ Not a git checkout — `.update` will use the ZIP package.');
+            } else if (same) {
+                report.push('✅ *You are on the latest commit.*');
+            } else if (cmp.behind === 0 && cmp.ahead > 0) {
+                report.push(`ℹ️ *Your checkout is ahead of GitHub* by ${cmp.ahead} local commit${cmp.ahead === 1 ? '' : 's'}.`);
+            } else {
+                report.push(`⬆️ *Update available${cmp.behind ? ` — ${cmp.behind} commit${cmp.behind === 1 ? '' : 's'} behind` : ''}.*`);
+                report.push('Reply with `.update` to apply it.');
+            }
+
+            await sock.sendMessage(chatId, { text: report.join('\n') }, { quoted: message });
         } catch (e) {
             await sock.sendMessage(chatId, { text: `⚠️ Could not check remote updates: ${e.message}` }, { quoted: message });
         }
