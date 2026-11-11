@@ -97,25 +97,139 @@ function downloadFile(url, dest, visited = new Set()) {
     });
 }
 
+/**
+ * Pure-Node ZIP extractor — no external unzip/7z/busybox required.
+ * Reads the ZIP central directory and inflates entries with zlib, so the
+ * source-only release can update itself even on a bare device.
+ */
+function extractZipNode(zipPath, outDir) {
+    const zlib = require('zlib');
+    const buf = fs.readFileSync(zipPath);
+
+    const EOCD_SIG = 0x06054b50;
+    const CEN_SIG = 0x02014b50;
+    const LOC_SIG = 0x04034b50;
+
+    // Locate the End Of Central Directory record (scan backwards, max comment 64K).
+    let eocd = -1;
+    const minEocd = Math.max(0, buf.length - 22 - 0xffff);
+    for (let i = buf.length - 22; i >= minEocd; i--) {
+        if (buf.readUInt32LE(i) === EOCD_SIG) { eocd = i; break; }
+    }
+    if (eocd === -1) throw new Error('not a ZIP file (no end-of-central-directory)');
+
+    let totalEntries = buf.readUInt16LE(eocd + 10);
+    let cdOffset = buf.readUInt32LE(eocd + 16);
+    let cdSize = buf.readUInt32LE(eocd + 12);
+
+    // Minimal ZIP64 support (locator sits 20 bytes before the EOCD).
+    if ((totalEntries === 0xffff || cdOffset === 0xffffffff || cdSize === 0xffffffff) && eocd >= 20) {
+        const locSig = buf.readUInt32LE(eocd - 20);
+        if (locSig === 0x07064b50) {
+            const z64 = Number(buf.readBigUInt64LE(eocd - 20 + 8));
+            if (buf.readUInt32LE(z64) === 0x06064b50) {
+                totalEntries = Number(buf.readBigUInt64LE(z64 + 32));
+                cdSize = Number(buf.readBigUInt64LE(z64 + 40));
+                cdOffset = Number(buf.readBigUInt64LE(z64 + 48));
+            }
+        }
+    }
+
+    const root = path.resolve(outDir);
+    fs.mkdirSync(root, { recursive: true });
+
+    let offset = cdOffset;
+    let written = 0;
+
+    for (let i = 0; i < totalEntries; i++) {
+        if (buf.readUInt32LE(offset) !== CEN_SIG) throw new Error('corrupt ZIP central directory');
+        const method = buf.readUInt16LE(offset + 10);
+        let compSize = buf.readUInt32LE(offset + 20);
+        let uncompSize = buf.readUInt32LE(offset + 24);
+        const nameLen = buf.readUInt16LE(offset + 28);
+        const extraLen = buf.readUInt16LE(offset + 30);
+        const commentLen = buf.readUInt16LE(offset + 32);
+        let localOffset = buf.readUInt32LE(offset + 42);
+        const name = buf.slice(offset + 46, offset + 46 + nameLen).toString('utf8');
+
+        // ZIP64 extended information extra field (0x0001).
+        if (compSize === 0xffffffff || uncompSize === 0xffffffff || localOffset === 0xffffffff) {
+            let ex = offset + 46 + nameLen;
+            const exEnd = ex + extraLen;
+            while (ex + 4 <= exEnd) {
+                const id = buf.readUInt16LE(ex);
+                const len = buf.readUInt16LE(ex + 2);
+                if (id === 0x0001) {
+                    let p = ex + 4;
+                    if (uncompSize === 0xffffffff) { uncompSize = Number(buf.readBigUInt64LE(p)); p += 8; }
+                    if (compSize === 0xffffffff) { compSize = Number(buf.readBigUInt64LE(p)); p += 8; }
+                    if (localOffset === 0xffffffff) { localOffset = Number(buf.readBigUInt64LE(p)); p += 8; }
+                    break;
+                }
+                ex += 4 + len;
+            }
+        }
+
+        offset += 46 + nameLen + extraLen + commentLen;
+
+        // Guard against path traversal.
+        const safeRel = String(name).split('/').filter((p) => p && p !== '.' && p !== '..').join('/');
+        if (!safeRel) continue;
+        const dest = path.resolve(root, safeRel);
+        if (dest !== root && !dest.startsWith(root + path.sep)) {
+            throw new Error(`unsafe path in ZIP: ${name}`);
+        }
+
+        if (name.endsWith('/')) {
+            fs.mkdirSync(dest, { recursive: true });
+            continue;
+        }
+
+        if (buf.readUInt32LE(localOffset) !== LOC_SIG) throw new Error(`corrupt ZIP local header for ${name}`);
+        const lnameLen = buf.readUInt16LE(localOffset + 26);
+        const lextraLen = buf.readUInt16LE(localOffset + 28);
+        const dataStart = localOffset + 30 + lnameLen + lextraLen;
+        const comp = buf.slice(dataStart, dataStart + compSize);
+
+        let out;
+        if (method === 0) out = comp;
+        else if (method === 8) out = zlib.inflateRawSync(comp);
+        else throw new Error(`unsupported ZIP compression method ${method} for ${name}`);
+
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.writeFileSync(dest, out);
+        written++;
+    }
+
+    return written;
+}
+
 async function extractZip(zipPath, outDir) {
     if (process.platform === 'win32') {
-        const cmd = `powershell -NoProfile -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${outDir.replace(/\\/g, '/')}' -Force"`;
-        await run(cmd);
-        return;
+        try {
+            const cmd = `powershell -NoProfile -Command "Expand-Archive -Path '${zipPath}' -DestinationPath '${outDir.replace(/\\/g, '/')}' -Force"`;
+            await run(cmd);
+            return;
+        } catch { /* fall through to the built-in extractor */ }
     }
+    for (const cmd of [
+        `unzip -o '${zipPath}' -d '${outDir}'`,
+        `7z x -y '${zipPath}' -o'${outDir}'`,
+        `busybox unzip -o '${zipPath}' -d '${outDir}'`
+    ]) {
+        try {
+            await run(cmd);
+            return;
+        } catch { /* try the next tool */ }
+    }
+    // No external tool available — fall back to the pure-Node extractor.
     try {
-        await run(`unzip -o '${zipPath}' -d '${outDir}'`);
+        const count = extractZipNode(zipPath, outDir);
+        console.log(`[update] extracted ${count} file(s) with the built-in ZIP reader`);
         return;
-    } catch {}
-    try {
-        await run(`7z x -y '${zipPath}' -o'${outDir}'`);
-        return;
-    } catch {}
-    try {
-        await run(`busybox unzip -o '${zipPath}' -d '${outDir}'`);
-        return;
-    } catch {}
-    throw new Error('No unzip tool found (unzip/7z/busybox).');
+    } catch (e) {
+        throw new Error(`No unzip tool found (unzip/7z/busybox) and built-in extraction failed: ${e.message}`);
+    }
 }
 
 function copyRecursive(src, dest, ignore = [], relative = '', outList = []) {
@@ -368,3 +482,5 @@ async function updateCommand(sock, chatId, message, zipOverride) {
 }
 
 module.exports = updateCommand;
+module.exports.extractZip = extractZip;
+module.exports.extractZipNode = extractZipNode;

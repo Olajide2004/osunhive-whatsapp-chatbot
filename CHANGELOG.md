@@ -29,6 +29,11 @@
   🛍️ Osunhive section in the interactive menu.
 
 ### Fixed
+- **`.update` no longer needs an external unzip tool** — when the bot is a
+  source-only install (no `.git`) and the device has no `unzip`/`7z`/`busybox`,
+  the ZIP is now unpacked by a **built-in pure-Node ZIP reader** (`zlib`), so
+  updates succeed on bare hosts. It handles stored and deflated entries, ZIP64,
+  directory entries and blocks path-traversal names. (`commands/update.js`)
 - **`.update check` now really compares commits** — it reads the local `HEAD`,
   queries the repo from `origin` (not a hardcoded upstream), reports local vs
   remote SHAs and how many commits behind you are, and distinguishes

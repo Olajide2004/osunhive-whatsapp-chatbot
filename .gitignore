@@ -25,6 +25,7 @@ data/messageCount.json
 data/premium.json
 data/cdnCache.json
 data/cdnState.json
+data/userName.json
 
 # OS / editor files
 .idea/

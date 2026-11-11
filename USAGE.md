@@ -346,6 +346,7 @@ Require group admin (bot must be admin for actions on members).
 ```
 .mode public|private        .settings            .update
 .update check               # compare local commit with GitHub
+                            # (no unzip needed — ZIP uses a built-in reader)
 .clearsession               .cleartmp            .antidelete <on/off>
 .setpp (reply to image)     .autoreact <on/off>  .autoread <on/off>
 .autostatus <on/off>        .autostatus react <on/off>
