@@ -17,6 +17,7 @@ const FileType = require('file-type')
 const path = require('path')
 const axios = require('axios')
 const { handleMessages, handleGroupParticipantUpdate, handleStatus } = require('./main');
+const { startHealthServer } = require('./lib/health');
 const { handleAntibotDetection } = require('./commands/antibot');
 const PhoneNumber = require('awesome-phonenumber')
 const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif')
@@ -75,6 +76,10 @@ setInterval(() => {
 // Override with: BOT_PHONE_NUMBER=2348xxxxxxxxx node index.js
 let phoneNumber = (process.env.BOT_PHONE_NUMBER || settings.ownerNumber || '234234567890').replace(/[^0-9]/g, '')
 global.phoneNumber = phoneNumber
+
+// Where Baileys keeps its auth keys. Point this at a volume on hosts with an
+// ephemeral filesystem (Docker, Render, Railway, Koyeb).
+const SESSION_DIR = process.env.SESSION_DIR || './session'
 let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
 global.botname = "Osunhive Chatbot"
@@ -98,9 +103,20 @@ const question = (text) => {
 // Kept so signal handlers can close the socket cleanly (protects session state).
 let activeSocket = null;
 
+// Optional health endpoint for container hosts (Render, Railway, Koyeb, Fly).
+// Only starts when PORT is set, so Termux / plain VPS runs are unaffected.
+startHealthServer({
+    port: process.env.PORT,
+    getStatus: () => ({
+        connected: Boolean(activeSocket?.user?.id),
+        phone: activeSocket?.user?.id ? activeSocket.user.id.split(':')[0].split('@')[0] : null,
+        version: settings.version
+    })
+})
+
 async function startXeonBotInc() {    try {
         let { version, isLatest } = await fetchLatestBaileysVersion()
-        const { state, saveCreds } = await useMultiFileAuthState(`./session`)
+        const { state, saveCreds } = await useMultiFileAuthState(SESSION_DIR)
         const msgRetryCounterCache = new NodeCache()
 
         const XeonBotInc = makeWASocket({
@@ -342,7 +358,7 @@ async function startXeonBotInc() {    try {
 
             if (isLoggedOut) {
                 try {
-                    rmSync('./session', { recursive: true, force: true })
+                    rmSync(SESSION_DIR, { recursive: true, force: true })
                     console.log(chalk.yellow('Session folder deleted. Please re-authenticate.'))
                 } catch (error) {
                     console.error('Error deleting session:', error)

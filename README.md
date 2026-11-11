@@ -160,7 +160,7 @@ Light up a chat and keep an eye on the holidays:
 
 ---
 
-## ☁️ Deploy (VPS)
+## ☁️ Deploy
 
 Source-only package — install dependencies on the server.
 
@@ -171,12 +171,24 @@ pnpm install
 node index.js
 ```
 
-A systemd unit and PM2 config are provided in [`deploy/`](deploy/):
+| Route | How |
+| --- | --- |
+| 🖥️ **VPS** (systemd / PM2) | `deploy/osunhive-bot.service`, `deploy/ecosystem.config.js` — step-by-step in [`deploy/README.md`](deploy/README.md) |
+| 🐳 **Docker** (VPS, Fly, Railway, Koyeb) | `docker compose up -d --build` — auth keys live on the `osunhive-session` volume |
+| 🟣 **Render** | [`render.yaml`](render.yaml) Blueprint: Docker + health check + 1 GB disk at `/data` for `session/` |
+| 🧪 **GitHub Codespaces** | `.devcontainer/` — one-click sandbox for testing/QR pairing (not 24/7) |
+| 🆓 **Free VPS** | Oracle Cloud Always Free (4 ARM cores/24 GB) is the only true free 24/7 option — see [`deploy/README.md` §12](deploy/README.md) |
 
-- `deploy/osunhive-bot.service`
-- `deploy/ecosystem.config.js`
-- `deploy/start.sh` / `deploy/stop.sh`
-- `deploy/README.md` — **step-by-step VPS guide**
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Olajide2004/osunhive-whatsapp-chatbot)
+
+Every container host needs `BOT_PHONE_NUMBER` (digits only) and a **persistent
+volume for `session/`** (`SESSION_DIR`), or you must re-pair after each
+restart. On startup the bot prints a pairing code: **WhatsApp → Linked
+devices → Link with phone number**.
+
+When `PORT` is set the bot also serves `GET /healthz` →
+`{"ok":true,"connected":true,…}` for platform health checks; on Termux and
+plain VPS runs nothing extra listens.
 
 > Use **`SIGTERM`** to stop (never `kill -9`) so the session is flushed cleanly.
 
@@ -192,6 +204,10 @@ commands/           one file per command
 lib/                shared helpers (AI layout, previews, TTS, store, auth)
 data/               JSON state/defaults (runtime state git-ignored)
 deploy/             systemd / PM2 / scripts
+Dockerfile          container image (ffmpeg + /data session volume)
+render.yaml         Render Blueprint (Docker + disk)
+.devcontainer/      Codespaces sandbox
+scripts/            offline test runner
 .github/workflows/  automation (contribution snake)
 test-*.js           offline test suites
 ```

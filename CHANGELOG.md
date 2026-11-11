@@ -3,7 +3,14 @@
 ## Unreleased
 
 ### Added
-- **Repo automation (`.github`)** — CI runs syntax checks, the 11 offline test
+- **Deploy anywhere** — `GET /healthz` (only when `PORT` is set) for container
+  platforms, `SESSION_DIR` to relocate the auth keys, a multi-stage
+  `Dockerfile` (Node 22 + ffmpeg) with `docker-compose.yml` and a session
+  volume, a `render.yaml` Blueprint (Docker + health check + 1 GB disk),
+  `.devcontainer/` for GitHub Codespaces, and `.env.example`. The deploy guide
+  now covers Docker, Render, Codespaces and free/cheap hosts.
+  (`lib/health.js`, `index.js`, `test-health.js`, `deploy/README.md`)
+- **Repo automation (`.github`)** — CI runs syntax checks, the 12 offline test
   suites (Node 20/22) and a source-package leak scan; a tag-driven **Release**
   workflow builds the source archives; plus issue/PR templates, `SECURITY.md`,
   `FUNDING.yml`, Dependabot and `CODEOWNERS`. `pnpm test` now runs

@@ -1,0 +1,50 @@
+# Render Blueprint — Osunhive Chatbot (https://render.com/docs/blueprint-spec)
+#
+# Deploy: Render Dashboard -> New -> Blueprint -> pick this repo.
+# Then set BOT_PHONE_NUMBER (the bot's number, digits only) when prompted.
+# The pairing code appears in the service logs: WhatsApp -> Linked devices ->
+# Link with phone number.
+#
+# IMPORTANT: this uses the Starter plan because free web services on Render
+#   * sleep after 15 minutes without traffic (the WhatsApp socket dies), and
+#   * cannot mount a persistent disk (auth keys are wiped on every restart).
+# A free-tier demo is possible (see the commented block at the bottom) but it
+# will need a new pairing code after every sleep/deploy.
+services:
+  - type: web
+    name: osunhive-chatbot
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: BOT_PHONE_NUMBER
+        sync: false
+      - key: SESSION_DIR
+        value: /data/session
+      - key: TZ
+        value: Africa/Lagos
+      - key: NODE_ENV
+        value: production
+      # Free instance type only allows one instance at a time.
+      - key: WEB_CONCURRENCY
+        value: "1"
+    disk:
+      name: osunhive-session
+      mountPath: /data
+      sizeGB: 1
+
+# ---------------------------------------------------------------------------
+# Free-tier variant (testing only, NOT 24/7):
+#
+#   plan: free
+#   # remove the `disk:` block — free services cannot mount a disk
+#   # session keys then live in ephemeral storage and are lost on restart
+#
+# Kept awake with a 5-minute ping to https://<service>.onrender.com/healthz
+# (cron-job.org / UptimeRobot). Render still restarts free services
+# periodically, so budget on re-pairing.
+# ---------------------------------------------------------------------------

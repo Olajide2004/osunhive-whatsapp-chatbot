@@ -1,0 +1,29 @@
+{
+  "name": "Osunhive Chatbot (test)",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "onCreateCommand": "corepack enable && corepack prepare pnpm@9 --activate",
+  "postCreateCommand": "pnpm install --frozen-lockfile",
+  "postAttachCommand": "echo 'Run: BOT_PHONE_NUMBER=<bot-number> node index.js — then enter the pairing code in WhatsApp (Linked devices > Link with phone number).'",
+  "forwardPorts": [10000],
+  "portsAttributes": {
+    "10000": {
+      "label": "health",
+      "onAutoForward": "silent"
+    }
+  },
+  "containerEnv": {
+    "SESSION_DIR": "${containerWorkspaceFolder}/session",
+    "TZ": "Africa/Lagos"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.vscode-github-actions"
+      ],
+      "settings": {
+        "files.eol": "\n"
+      }
+    }
+  },
+  "remoteUser": "node"
+}

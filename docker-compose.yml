@@ -1,0 +1,40 @@
+# Osunhive Chatbot — Docker / any VPS
+#
+#   cp .env.example .env      # set BOT_PHONE_NUMBER at least
+#   docker compose up -d --build
+#   docker compose logs -f
+#
+# The named volume keeps WhatsApp auth keys across rebuilds, so the bot stays
+# paired. Do NOT delete the volume unless you want a new pairing code.
+services:
+  bot:
+    build: .
+    image: osunhive-chatbot:latest
+    container_name: osunhive-bot
+    restart: unless-stopped
+    init: true
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      BOT_PHONE_NUMBER: ${BOT_PHONE_NUMBER:-}
+      SESSION_DIR: /data/session
+      TZ: ${TZ:-Africa/Lagos}
+      PORT: ${PORT:-10000}
+    volumes:
+      - osunhive-session:/data
+    ports:
+      - "${PORT:-10000}:${PORT:-10000}"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "require('http').get('http://127.0.0.1:'+(process.env.PORT||10000)+'/healthz',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+
+volumes:
+  osunhive-session:

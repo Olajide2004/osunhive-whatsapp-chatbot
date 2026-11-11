@@ -147,12 +147,93 @@ data/messageCount.json      # bot mode (public/private) + usage stats
 
 ```bash
 cd /opt/osunhive-v2
-node test-polls.js         # offline poll round-trip test
-node test-scheduler.js     # schedule parser unit tests
-node test-meta-style.js    # Meta AI persona unit tests
+node scripts/run-tests.js      # every offline suite (12 of them)
+node scripts/run-tests.js --list
+node scripts/run-tests.js health   # only matching suites
 ```
+
+## 9. Docker (any VPS, Fly.io, Railway, Koyeb…)
+
+The image installs ffmpeg, uses Node 22 and keeps WhatsApp auth keys on a
+volume. **The volume is the pairing** — delete it and you must link again.
+
+```bash
+cp .env.example .env          # set BOT_PHONE_NUMBER=<bot number, digits only>
+docker compose up -d --build
+docker compose logs -f        # pairing code shows up here on first run
+```
+
+First run: watch the logs, then enter the pairing code in
+**WhatsApp → Linked devices → Link with phone number**.
+
+```bash
+docker compose restart        # keep the same session
+docker compose up -d --build  # update the code, session survives
+docker compose down           # stop (volume kept)
+docker compose down -v        # stop AND unpair (deletes the volume)
+```
+
+`.update` inside a container is pointless — the image is the deployment. Pull
+the new source and rebuild instead.
+
+Health check: `http://<host>:10000/healthz` → `{"ok":true,"connected":true,…}`.
+`PORT` and `SESSION_DIR` are honoured, so the same image works on Render,
+Railway, Koyeb and Fly (mount a volume at `/data`).
+
+## 10. Render (Blueprint)
+
+`render.yaml` in the repo root defines the service: Docker runtime, health
+check on `/healthz`, and a **1 GB disk at `/data`** for the session.
+
+1. Render Dashboard → **New → Blueprint** → pick this repository.
+2. When prompted, set `BOT_PHONE_NUMBER` (digits only, no `+`).
+3. Deploy, then open **Logs** and read the pairing code.
+4. WhatsApp → Linked devices → Link with phone number.
+
+| | Free | Starter (~$7/mo) |
+|---|---|---|
+| Sleeps after 15 min idle | ✅ yes (socket dies) | ❌ never |
+| Persistent disk for `session/` | ❌ not available | ✅ 1 GB |
+| Re-pair needed | after every sleep/deploy | only once |
+
+So: **free Render = demo only.** A 5-minute ping to `/healthz`
+(cron-job.org / UptimeRobot) keeps a free service awake, but Render still
+restarts free instances and without a disk the pairing is lost — you would
+have to link again each time. For genuine free 24/7 use the Oracle VM in §12.
+
+## 11. GitHub Codespaces (testing only)
+
+`.devcontainer/devcontainer.json` makes Codespaces a one-click sandbox:
+
+1. Repo → **Code → Codespaces → Create codespace on main** (deps install
+   automatically).
+2. In the terminal: `BOT_PHONE_NUMBER=<number> node index.js`.
+3. Enter the pairing code from the terminal in WhatsApp.
+
+Codespaces **stops after ~30 minutes idle** and the free tier is ~60 h/month
+on 2 cores, so it is for testing, not hosting. The container is thrown away
+and `session/` does not survive.
+
+## 12. Free / cheap hosts
+
+| Host | Free? | Verdict for a WhatsApp bot |
+|---|---|---|
+| **Oracle Cloud Always Free** | ✅ always | Best free option: 4 ARM cores / 24 GB RAM + 200 GB disk. Card verification required; ARM capacity can be scarce (retry, or try another availability domain). Use §1–5 (systemd) or §9 (Docker). |
+| **Google Cloud free tier** | ✅ 1 × e2-micro | Real 24/7 VM, small, 1 GB egress/month — heavy media use may exceed it. |
+| **Azure free account** | 12 months B1s + credit | Fine for a year, then paid. |
+| **AWS free tier** | ⚠️ credits | Since 2025 it is credit-based, not a free year — read the terms. |
+| **Render free** | ✅ but sleeps | Demo only (see §10). |
+| **Railway / Fly.io / Koyeb** | 💳 trial/paid | Excellent, but not free forever; Railway gives a small trial credit. |
+| **GitHub Student Pack** | ✅ credits | $200 DigitalOcean, Azure credit, etc. — best value if you have a student account. |
+| **GitHub Actions / Pages** | ❌ | 6-hour job limit, no persistent disk, and hosting is against the ToS. |
+
+> ⚠️ Free-VPS offers shared in WhatsApp groups are frequently trials,
+> crypto-mining boxes or credential harvesters. Never paste your WhatsApp
+> **session folder**, pairing code or bot credentials into a host you do not
+> control — those keys are the account.
 
 Ensure the final zip includes:
 - `lib/scheduler.js`, `commands/schedule.js`
 - `lib/polls.js`, `commands/poll.js`, `lib/linkPreview.js`, `commands/unfurl.js`
+- `lib/health.js`, `Dockerfile`, `docker-compose.yml`, `render.yaml`, `.devcontainer/`
 - All updated files (`main.js`, `index.js`, `commands/autotyping.js`, `commands/help.js`, `docs.md`)

@@ -29,7 +29,8 @@ const SUITES = [
     'test-celebrate.js',
     'test-menu-buttons.js',
     'test-polls.js',
-    'test-scheduler.js'
+    'test-scheduler.js',
+    'test-health.js'
 ];
 
 const args = process.argv.slice(2);

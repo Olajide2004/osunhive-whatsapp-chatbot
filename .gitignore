@@ -19,6 +19,7 @@ commit-msg.txt
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Runtime statistics/state — may contain JIDs, LIDs and phone numbers
 data/messageCount.json

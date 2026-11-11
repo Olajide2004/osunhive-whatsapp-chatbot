@@ -1,0 +1,27 @@
+# Build context: keep only what the image needs.
+.git
+.github
+.devcontainer
+
+node_modules
+session
+temp
+tmp
+logs
+*.log
+
+.env
+.env.*
+
+baileys_store.json
+data/messageCount.json
+data/premium.json
+data/cdnCache.json
+data/cdnState.json
+data/userName.json
+
+.DS_Store
+.idea
+.vscode
+*.zip
+*.tar.gz
