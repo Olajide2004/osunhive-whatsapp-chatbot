@@ -40,7 +40,17 @@ function makeMessage(body, extra = {}) {
 }
 
 const sock = makeSock();
-const storeRef = { contacts: { '2348011111111@s.whatsapp.net': {} }, chats: {}, messages: {} };
+// Enough known contacts that the recipient cap can be exercised without
+// relying on a real `session/` folder (CI has no session and must not need one).
+const knownContacts = [
+    '2348011111111', '2348022222222', '2348033333333', '2348044444444',
+    '2348055555555', '2348066666666', '2348077777777', '2348088888888'
+];
+const storeRef = {
+    contacts: Object.fromEntries(knownContacts.map((n) => [`${n}@s.whatsapp.net`, {}])),
+    chats: {},
+    messages: {}
+};
 
 function lastText() {
     const entry = sent[sent.length - 1];

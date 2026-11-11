@@ -312,6 +312,12 @@ function readLidMappedContacts() {
     if (Date.now() - lidCache.at < 60_000) return lidCache.numbers;
 
     const numbers = [];
+    if (!fs.existsSync(SESSION_DIR)) {
+        // Fresh clone / CI: no session yet, so no contact book to read.
+        lidCache = { at: Date.now(), numbers };
+        return numbers;
+    }
+
     try {
         for (const file of fs.readdirSync(SESSION_DIR)) {
             const match = /^lid-mapping-(\d+)_reverse\.json$/.exec(file);
