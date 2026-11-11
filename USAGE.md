@@ -11,11 +11,6 @@ auto-reply, status posting, scheduling and moderation.
 > The bot replies to commands that start with a **dot** (`.`). Plain text is
 > handled by the auto-reply engine only when it is switched on.
 
-> [!WARNING]
-> ⚠️ **Disclaimer** — *Osunhive Chatbot* is an **unofficial** project, **not affiliated with WhatsApp (Meta) or Baileys**. Automating an account may breach WhatsApp's Terms of Service — use a **spare number at your own risk**.
->
-> 🙏 **Credit:** 💬 WhatsApp • 🧩 [Baileys](https://github.com/WhiskeySockets/Baileys) • 🧠 [Osunhive](https://www.osunhive.name.ng)
-
 ---
 
 ## 1. Getting started
@@ -315,6 +310,7 @@ Recurring messages to a chat or to Status.
 .unfurl <url>          .vcard         .react [emoji]
 .linkpreview on|off
 .schedule ...          .voice <text>
+.fireworks [text]      .countdown [christmas|newyear|ramadan]
 ```
 
 Notes:

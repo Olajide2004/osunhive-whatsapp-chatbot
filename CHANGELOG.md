@@ -3,11 +3,15 @@
 ## Unreleased
 
 ### Added
-- **Disclaimer & credit** — a ⚠️ warning blockquote now appears at the top of
-  the README and `USAGE.md` (and under the bot's `.menu` / `.guide` output),
-  stating the project is **unofficial / not affiliated with WhatsApp or
-  Baileys**, and crediting 💬 WhatsApp, 🧩 Baileys and 🧠 Osunhive.
-  (`README.md`, `USAGE.md`, `commands/help.js`, `commands/guide.js`)
+- **Holiday countdown & fireworks** — `.countdown` shows the days to 🎄 Christmas,
+  🎆 New Year and 🌙 Ramadan (fasting); `.countdown christmas|newyear|ramadan`
+  zooms in on one. `.fireworks [text]` sends an animated 🎆 fireworks message
+  that cycles through frames (message edits) with your own greeting.
+  (`commands/celebrate.js`, `main.js`)
+- **Disclaimer & credit** — a ⚠️ warning blockquote lives at the top of the
+  **README only**: *unofficial / not affiliated with WhatsApp or Baileys*, with
+  💬 WhatsApp, 🧩 Baileys and 🧠 Osunhive credited. It was deliberately kept out
+  of the bot's runtime output. (`README.md`)
 - **CDN browser buttons** — `.cdn` listings now ship interactive buttons:
   `📂 #n` / `📤 #n` shortcuts, `⬆️ Up`, `🏠 Root`, `🔄 Refresh`, `➡️ Page n`
   and a `🌐 Osunhive` link. Toggle with `.cdn buttons on|off`.

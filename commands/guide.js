@@ -5,8 +5,6 @@
  *   .guide full       full guide, sent as several messages
  */
 
-const { DISCLAIMER } = require('./help');
-
 const GUIDE_QUICK =
     `📘 *Osunhive Chatbot — Quick Guide*\n\n` +
     `*Open menu*\n` +
@@ -30,13 +28,13 @@ const GUIDE_QUICK =
     `.schedule list\n\n` +
     `*Utilities*\n` +
     `.ping • .voice <text> • .unfurl <url>\n` +
+    `.fireworks [text] • .countdown [christmas|newyear|ramadan]\n` +
     `.products / .shop • .website / .links\n` +
     `.linkpreview on|off • .react 👍 • .poll\n\n` +
     `*Moderation*\n` +
     `.ban • .kick • .promote • .demote • .mute\n` +
     `.antilink • .tagall • .hidetag\n\n` +
-    `Full guide: .guide full • Website: https://www.osunhive.name.ng\n\n` +
-    DISCLAIMER;
+    `Full guide: .guide full • Website: https://www.osunhive.name.ng`;
 
 const GUIDE_FULL = [
     `📘 *Osunhive Chatbot — Usage*\n\n` +
@@ -99,8 +97,7 @@ const GUIDE_FULL = [
     `.ban .kick .promote .demote .mute .warn\n` +
     `.antilink .antitag .antibot .welcome .goodbye\n` +
     `.sticker .ai .gpt .imagine .play .tiktok\n\n` +
-    `See .menu all for the complete list.\n\n` +
-    DISCLAIMER
+    `See .menu all for the complete list.`
 ];
 
 module.exports = async function guideCommand(sock, chatId, args, message) {

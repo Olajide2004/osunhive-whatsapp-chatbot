@@ -162,6 +162,7 @@ const { animeCommand } = require('./commands/anime');
 const { piesCommand, piesAlias } = require('./commands/pies');
 const stickercropCommand = require('./commands/stickercrop');
 const updateCommand = require('./commands/update');
+const { fireworksCommand, countdownCommand } = require('./commands/celebrate');
 const removebgCommand = require('./commands/removebg');
 const { reminiCommand } = require('./commands/remini');
 const { igsCommand } = require('./commands/igs');
@@ -689,6 +690,14 @@ if (!userMessage.startsWith('.')) {
             case userMessage === '.website' || userMessage === '.links' ||
                  userMessage === '.link' || userMessage === '.socials':
                 await websiteCommand(sock, chatId, message);
+                commandExecuted = true;
+                break;
+            case userMessage === '.fireworks' || userMessage.startsWith('.fireworks '):
+                await fireworksCommand(sock, chatId, message, rawIncoming.slice(10).trim());
+                commandExecuted = true;
+                break;
+            case userMessage === '.countdown' || userMessage.startsWith('.countdown '):
+                await countdownCommand(sock, chatId, message, userMessage.slice(10).trim());
                 commandExecuted = true;
                 break;
             case userMessage === '.sticker' || userMessage === '.s':

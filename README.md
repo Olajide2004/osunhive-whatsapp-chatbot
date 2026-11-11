@@ -125,9 +125,37 @@ Most behaviour is toggled **from WhatsApp itself**, e.g.:
 .autopoststatus on
 .autoreply on
 .ban  .kick  .mute  .warn
+.fireworks Happy New Year
+.countdown christmas|newyear|ramadan
 ```
 
 > See [`USAGE.md`](USAGE.md) for the **complete list**, permissions and examples.
+
+---
+
+## 🎉 Celebrations
+
+Light up a chat and keep an eye on the holidays:
+
+| Command | What it does |
+| --- | --- |
+| `.fireworks [text]` | Sends an **animated 🎆 fireworks message** that cycles through several frames, with your own greeting. |
+| `.countdown` | Shows the **live countdown** to 🎄 Christmas, 🎆 New Year and 🌙 Ramadan (fasting). |
+| `.countdown christmas` | Full detail for one occasion (`.countdown newyear` / `.countdown ramadan`). |
+
+```text
+🎆✨ *FIREWORKS!* ✨🎆
+　✨　　　🎆　　　✨
+🎇　　　💥　　　🎇
+　✨　　　🎆　　　✨
+
+🎉 *Osunhive Countdown*
+🎄 Christmas — 44 days · 25 Dec 2026
+🎆 New Year — 51 days · 01 Jan 2027
+🌙 Ramadan (fasting) — 99 days · 18 Feb 2027
+```
+
+> 🌙 Ramadan dates follow moon sighting and can shift by a day.
 
 ---
 
