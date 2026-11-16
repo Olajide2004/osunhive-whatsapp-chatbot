@@ -33,8 +33,8 @@ importers:
         specifier: ^5.9.0
         version: 5.11.0
       axios:
-        specifier: ^1.8.4
-        version: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+        specifier: ^1.21.1
+        version: 1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       baileys:
         specifier: npm:@whiskeysockets/baileys
         version: '@whiskeysockets/baileys@7.0.0-rc14(jimp@1.6.1(supports-color@7.2.0))(link-preview-js@3.2.0)(sharp@0.35.5(@types/node@18.19.130))(supports-color@7.2.0)'
@@ -78,8 +78,8 @@ importers:
         specifier: ^22.1.0
         version: 22.1.0(supports-color@7.2.0)
       libphonenumber-js:
-        specifier: ^1.11.18
-        version: 1.13.15
+        specifier: ^1.13.16
+        version: 1.13.16
       libsignal:
         specifier: ^2.0.1
         version: 2.0.1
@@ -782,8 +782,8 @@ packages:
     resolution: {integrity: sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==}
     deprecated: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
 
-  axios@1.21.0:
-    resolution: {integrity: sha512-YCzXMB53Q9PZBsh7yN7wtapit4WepwcHS2fP8QhGsBxSz5YtgYobV7GGlWlAJi+RxfU77GQTQi2DSLUma42EYA==}
+  axios@1.21.1:
+    resolution: {integrity: sha512-6eI5Q/Y4u/Um9dDlsRoq5pY2rxnUTv+L4PpLitnbk/i4jb3MxLZ5CsN5Ih3IysbeRYK4pR+P7qfMsOQl9fwwFQ==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1464,8 +1464,8 @@ packages:
     resolution: {integrity: sha512-YiGkH6EnGrDGqLMITnGjXtGmNtjoXw9SVUzcaos8RBi7Ps0VBylkq+vOcY9QE5poLasPCR849ucFUkl0UzUyOw==}
     engines: {node: '>=0.10.0'}
 
-  libphonenumber-js@1.13.15:
-    resolution: {integrity: sha512-AHdhEQeDFEJ4GKDAQ9AwxChy+v2kUILUB3TGQRpkXMkWePjXTU/WQEzWVQoIx/Gz8fE73Wr5SEuZCy2vk8jrMQ==}
+  libphonenumber-js@1.13.16:
+    resolution: {integrity: sha512-tIOCM9yx2Go6d5/ZANe0K+G4AZek1Ymx81HxQpf19Sri4zMP95eQbKdnUGHAvFQ4nx0PeLhFqvAfisTADXj3tQ==}
 
   libsignal@2.0.1:
     resolution: {integrity: sha512-kqdl/BK5i0WCa4NxhtiBsjSzztB/FtUp3mVVLKBFicWH8rDsq95tEIqNcCaVlflLxOm6T/HRb/zv8IsCe7aopA==}
@@ -2847,7 +2847,7 @@ snapshots:
 
   '@ryuu-reinzz/button-helper@2.2.3(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)':
     dependencies:
-      axios: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -3016,9 +3016,9 @@ snapshots:
 
   aws4@1.13.2: {}
 
-  axios-cookiejar-support@5.0.5(axios@1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(tough-cookie@5.1.2):
+  axios-cookiejar-support@5.0.5(axios@1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(tough-cookie@5.1.2):
     dependencies:
-      axios: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       http-cookie-agent: 6.0.8(tough-cookie@5.1.2)
       tough-cookie: 5.1.2
     transitivePeerDependencies:
@@ -3030,7 +3030,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
+  axios@1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       follow-redirects: 1.16.3(debug@4.4.3(supports-color@7.2.0))
       form-data: 4.0.6
@@ -3855,7 +3855,7 @@ snapshots:
     dependencies:
       invert-kv: 1.0.0
 
-  libphonenumber-js@1.13.15: {}
+  libphonenumber-js@1.13.16: {}
 
   libsignal@2.0.1:
     dependencies:
@@ -3958,7 +3958,7 @@ snapshots:
 
   mumaker@2.0.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
-      axios: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios: 1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
       cheerio: 1.2.0
       form-data: 4.0.6
     transitivePeerDependencies:
@@ -4368,8 +4368,8 @@ snapshots:
   ruhend-scraper@8.3.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0):
     dependencies:
       '@distube/ytdl-core': 5.2.1
-      axios: 1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
-      axios-cookiejar-support: 5.0.5(axios@1.21.0(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(tough-cookie@5.1.2)
+      axios: 1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)
+      axios-cookiejar-support: 5.0.5(axios@1.21.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0))(tough-cookie@5.1.2)
       cheerio: 1.0.0-rc.10
       node-fetch: 2.7.0
       tough-cookie: 5.1.2
