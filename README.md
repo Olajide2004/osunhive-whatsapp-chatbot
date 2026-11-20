@@ -262,7 +262,7 @@ render.yaml         Render Blueprint (Docker + disk)
 <div align="center">
 
 [![Website](https://img.shields.io/badge/Website-osunhive.name.ng-25D366?style=for-the-badge&logo=google-chrome&logoColor=white)](https://www.osunhive.name.ng)
-[![Link hub](https://img.shields.io/badge/Link%20hub-yo.fan%2Fosunhivetech-128C7E?style=for-the-badge&logo=linktree&logoColor=white)](https://yo.fan/osunhivetech)
+[![Link hub](https://img.shields.io/badge/Link%20hub-yo.fan%2Fosunhivetech-128C7E?style=for-the-badge&logo=linktree&logoColor=white)](https://t.co/vZO3YBCJGH)
 [![YouTube](https://img.shields.io/badge/YouTube-osunhivetech-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCh0GXMxUUshupWAPvYkvPEA)
 
 [![Facebook](https://img.shields.io/badge/Facebook-osunhive.name.ng-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/osunhive.name.ng)
